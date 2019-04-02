@@ -1,0 +1,11 @@
+item.build_tool.name=Build Tool
+item.symmetry_tool.name=Symmetry Tool
+
+tile.copy_block.name=Copy Block
+tile.paste_block.name=Paste Block
+tile.paste_variant_block.name=Paste Variant Block
+
+itemGroup.buildhelpertab=Build Helper (By Aaron Edmistone)
+
+buildhelper.build_tool.tooltip=Use this tool to help with building!
+buildhelper.symmetry_tool.tooltip=Use this tool to add/change lines of symmetry!

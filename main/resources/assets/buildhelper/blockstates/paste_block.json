@@ -1,0 +1,5 @@
+{
+	"variants": {
+		"normal": { "model": "buildhelper:paste_block" }
+	}
+}

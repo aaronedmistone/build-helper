@@ -1,0 +1,26 @@
+
+{
+	"item.build_tool.use": {
+		"category": "block",
+		"subtitle": "item.build_tool.use",
+		"sounds": [ { "name": "buildhelper:item/build_tool/use", "stream": true } ]
+	},
+	
+	"item.build_tool.rotate": {
+		"category": "block",
+		"subtitle": "item.build_tool.rotate",
+		"sounds": [ { "name": "buildhelper:item/build_tool/rotate", "stream": true } ]
+	},
+	
+	"item.build_tool.fail": {
+		"category": "block",
+		"subtitle": "item.build_tool.fail",
+		"sounds": [ { "name": "buildhelper:item/build_tool/fail", "stream": true } ]
+	},
+	
+	"item.symmetry_tool.use": {
+		"category": "block",
+		"subtitle": "item.symmetry_tool.use",
+		"sounds": [ { "name": "buildhelper:item/symmetry_tool/use", "stream": true } ]
+	}
+}

@@ -1,0 +1,156 @@
+{
+    "__comment": "Model by Aaron Edmistone",
+    "textures": {
+        "paste_block": "buildhelper:blocks/paste_variant_block"
+    },
+    "display": {
+        "gui": {
+            "rotation": [ 30, 45, 0 ],
+            "translation": [ 0, 1, 0 ],
+            "scale": [ 0.7, 0.7, 0.7 ]
+        },
+        "ground": {
+            "rotation": [ 0, 0, 0 ],
+            "translation": [ 0, 4, 0 ],
+            "scale": [ 0.5, 0.5, 0.5 ]
+        },
+        "fixed": {
+            "rotation": [ 0, 180, 0 ],
+            "translation": [ 1, 4, -7 ],
+            "scale": [ 1, 1, 0.25 ]
+        },
+        "firstperson_righthand": {
+            "rotation": [ 0, 232, 18 ],
+            "translation": [ -1, 4.5, 0 ],
+            "scale": [ 0.4, 0.4, 0.4 ]
+        },
+        "thirdperson_righthand": {
+            "rotation": [ 75, 238, 12 ],
+            "translation": [ 0, 3.5, 0 ],
+            "scale": [ 0.375, 0.375, 0.375 ]
+        }
+    },
+    "elements": [
+        {
+            "name": "ArrowPart1",
+            "from": [ 0, 2, 0 ], 
+            "to": [ 11, 5, 3 ], 
+            "faces": {
+                "north": { "texture": "#paste_block", "uv": [ 0, 0, 11, 3 ], "rotation": 90 },
+                "south": { "texture": "#paste_block", "uv": [ 0, 0, 11, 3 ], "rotation": 90 },
+                "west": { "texture": "#paste_block", "uv": [ 2, 2, 5, 5 ], "rotation": 90 },
+                "up": { "texture": "#paste_block", "uv": [ 0, 0, 3, 11 ], "rotation": 270 },
+                "down": { "texture": "#paste_block", "uv": [ 0, 0, 3, 11 ], "rotation": 270 }
+            }
+        },
+        {
+            "name": "ArrowPart2",
+            "from": [ 0, 2, 3 ], 
+            "to": [ 3, 5, 11 ], 
+            "faces": {
+                "east": { "texture": "#paste_block", "uv": [ 0, 0, 8, 3 ], "rotation": 90 },
+                "west": { "texture": "#paste_block", "uv": [ 0, 0, 8, 3 ], "rotation": 90 },
+                "up": { "texture": "#paste_block", "uv": [ 0, 0, 8, 3 ] },
+                "down": { "texture": "#paste_block", "uv": [ 0, 0, 8, 3 ] }
+            }
+        },
+        {
+            "name": "ArrowTip1",
+            "from": [ 0, 0, 11 ], 
+            "to": [ 3, 7, 12 ], 
+            "faces": {
+                "north": { "texture": "#paste_block", "uv": [ 0, 0, 3, 7 ] },
+                "east": { "texture": "#paste_block", "uv": [ 0, 0, 1, 7 ] },
+                "south": { "texture": "#paste_block", "uv": [ 0, 0, 3, 7 ] },
+                "west": { "texture": "#paste_block", "uv": [ 0, 0, 1, 7 ] },
+                "up": { "texture": "#paste_block", "uv": [ 0, 0, 1, 3 ], "rotation": 270 },
+                "down": { "texture": "#paste_block", "uv": [ 0, 0, 1, 3 ], "rotation": 270 }
+            }
+        },
+        {
+            "name": "ArrowTip2",
+            "from": [ 0, 1, 12 ], 
+            "to": [ 3, 6, 13 ], 
+            "faces": {
+                "east": { "texture": "#paste_block", "uv": [ 0, 0, 1, 5 ] },
+                "south": { "texture": "#paste_block", "uv": [ 0, 0, 3, 5 ] },
+                "west": { "texture": "#paste_block", "uv": [ 0, 0, 1, 5 ] },
+                "up": { "texture": "#paste_block", "uv": [ 0, 0, 1, 3 ], "rotation": 270 },
+                "down": { "texture": "#paste_block", "uv": [ 0, 0, 1, 3 ], "rotation": 270 }
+            }
+        },
+        {
+            "name": "ArrowTip3",
+            "from": [ 0, 2, 13 ], 
+            "to": [ 3, 5, 14 ], 
+            "faces": {
+                "east": { "texture": "#paste_block", "uv": [ 0, 0, 1, 3 ] },
+                "south": { "texture": "#paste_block", "uv": [ 0, 0, 3, 3 ] },
+                "west": { "texture": "#paste_block", "uv": [ 0, 0, 1, 3 ] },
+                "up": { "texture": "#paste_block", "uv": [ 0, 0, 1, 3 ], "rotation": 270 },
+                "down": { "texture": "#paste_block", "uv": [ 0, 0, 1, 3 ], "rotation": 270 }
+            }
+        },
+        {
+            "name": "ArrowTip4",
+            "from": [ 0, 3, 14 ], 
+            "to": [ 3, 4, 15 ], 
+            "faces": {
+                "east": { "texture": "#paste_block", "uv": [ 0, 0, 1, 1 ] },
+                "south": { "texture": "#paste_block", "uv": [ 0, 0, 3, 1 ] },
+                "west": { "texture": "#paste_block", "uv": [ 0, 0, 1, 1 ] },
+                "up": { "texture": "#paste_block", "uv": [ 0, 0, 1, 3 ], "rotation": 270 },
+                "down": { "texture": "#paste_block", "uv": [ 0, 0, 1, 3 ], "rotation": 270 }
+            }
+        },
+        {
+            "name": "ArrowPart5",
+            "from": [ 11, 0, 0 ], 
+            "to": [ 12, 7, 3 ], 
+            "faces": {
+                "north": { "texture": "#paste_block", "uv": [ 0, 0, 1, 7 ] },
+                "east": { "texture": "#paste_block", "uv": [ 0, 0, 3, 7 ] },
+                "south": { "texture": "#paste_block", "uv": [ 0, 0, 1, 7 ] },
+                "west": { "texture": "#paste_block", "uv": [ 0, 0, 3, 7 ] },
+                "up": { "texture": "#paste_block", "uv": [ 0, 0, 3, 1 ], "rotation": 270 },
+                "down": { "texture": "#paste_block", "uv": [ 0, 0, 3, 1 ], "rotation": 270 }
+            }
+        },
+        {
+            "name": "ArrowPart6",
+            "from": [ 12, 1, 0 ], 
+            "to": [ 13, 6, 3 ], 
+            "faces": {
+                "north": { "texture": "#paste_block", "uv": [ 0, 0, 1, 5 ] },
+                "east": { "texture": "#paste_block", "uv": [ 0, 0, 3, 5 ] },
+                "south": { "texture": "#paste_block", "uv": [ 0, 0, 1, 5 ] },
+                "up": { "texture": "#paste_block", "uv": [ 0, 0, 3, 1 ], "rotation": 270 },
+                "down": { "texture": "#paste_block", "uv": [ 0, 0, 3, 1 ], "rotation": 270 }
+            }
+        },
+        {
+            "name": "ArrowPart7",
+            "from": [ 13, 2, 0 ], 
+            "to": [ 14, 5, 3 ], 
+            "faces": {
+                "north": { "texture": "#paste_block", "uv": [ 0, 0, 1, 3 ] },
+                "east": { "texture": "#paste_block", "uv": [ 0, 0, 3, 3 ] },
+                "south": { "texture": "#paste_block", "uv": [ 0, 0, 1, 3 ] },
+                "up": { "texture": "#paste_block", "uv": [ 0, 0, 3, 1 ], "rotation": 270 },
+                "down": { "texture": "#paste_block", "uv": [ 0, 0, 3, 1 ], "rotation": 270 }
+            }
+        },
+        {
+            "name": "ArrowPart8",
+            "from": [ 14, 3, 0 ], 
+            "to": [ 15, 4, 3 ], 
+            "faces": {
+                "north": { "texture": "#paste_block", "uv": [ 0, 0, 1, 1 ] },
+                "east": { "texture": "#paste_block", "uv": [ 0, 0, 3, 1 ] },
+                "south": { "texture": "#paste_block", "uv": [ 0, 0, 1, 1 ] },
+                "up": { "texture": "#paste_block", "uv": [ 0, 0, 3, 1 ], "rotation": 270 },
+                "down": { "texture": "#paste_block", "uv": [ 0, 0, 3, 1 ], "rotation": 270 }
+            }
+        }
+    ]
+}

@@ -2,7 +2,8 @@ package com.edmistone.buildhelper.operations;
 
 import net.minecraft.util.math.BlockPos;
 
-/** Functions for calculation of various things */
+/** Functions for calculation of various things 
+ *  @author Aaron Edmistone */
 public class Calculate
 {
 	/** Calculate the distance between two block positions */

@@ -1,74 +1,57 @@
 package com.edmistone.buildhelper.registry;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.edmistone.buildhelper.Info;
 import com.edmistone.buildhelper.blocks.BlockCopyBlock;
 import com.edmistone.buildhelper.blocks.BlockPasteBlock;
 import com.edmistone.buildhelper.blocks.BlockPasteVariantBlock;
 
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.model.ModelLoader;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraft.item.ItemGroup;
+import net.minecraftforge.registries.IForgeRegistry;
 
-/** Initialisation and registration of all mod blocks */
+/** Initialisation and registration of all mod blocks 
+ *  @author Aaron Edmistone */
 public class Blocks
 {
+	public static Map<Block, ItemBlock> BLOCK_ITEMS = new HashMap<Block, ItemBlock>();
+	
 	public static Block copyBlock;
 	public static Block pasteBlock;
 	public static Block pasteVariantBlock;
 
 	public static void init()
 	{
+		//Note BlockPasteVariantBlock disabled until variant cycling is corrected
+		
 		copyBlock = new BlockCopyBlock("copy_block");
 		pasteBlock = new BlockPasteBlock("paste_block");
-		pasteVariantBlock = new BlockPasteVariantBlock("paste_variant_block");
+		//pasteVariantBlock = new BlockPasteVariantBlock("paste_variant_block");
+		
+		map(copyBlock, Info.TAB);
+		map(pasteBlock, Info.TAB);
+		//map(pasteVariantBlock, Info.TAB);
 	}
 
-	public static void register()
+	public static void register(IForgeRegistry<Block> registry)
 	{
-		registerBlock(copyBlock);
-		registerBlock(pasteBlock);
-		registerBlock(pasteVariantBlock);
-	}
-
-	public static void registerRenders()
-	{
-		registerRender(copyBlock);
-		registerRender(pasteBlock);
-		registerRender(pasteVariantBlock);
-	}
-
-	public static void registerBlock(Block block)
-	{
-		block.setCreativeTab(Info.TAB);
-		GameRegistry.register(block);
-		GameRegistry.register(new ItemBlock(block).setRegistryName(block.getRegistryName()));
-		Info.LOG.info("Registered block for " + block.getUnlocalizedName().substring(5));
-	}
-
-	public static void registerBlock(Block block, ItemBlock itemBlock)
-	{
-		block.setCreativeTab(Info.TAB);
-		GameRegistry.register(block);
-		GameRegistry.register(itemBlock.setRegistryName(block.getRegistryName()));
-		Info.LOG.info("Registered block for " + block.getUnlocalizedName().substring(5));
+		init();
+		
+		registry.registerAll(
+				copyBlock,
+				pasteBlock
+				/*pasteVariantBlock*/);
+		
+		
+		Info.LOG.info("Registered blocks for Build Helper");
 	}
 	
-	public static void registerRender(Block block)
+	public static void map(Block block, ItemGroup tab)
 	{
-		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), 0, new ModelResourceLocation(
-				new ResourceLocation(Info.MODID, block.getUnlocalizedName().substring(5)), "inventory"));
-		Info.LOG.info("Registered render for " + block.getUnlocalizedName().substring(5));
+		BLOCK_ITEMS.put(block, (ItemBlock) new ItemBlock(block, new Item.Properties().group(tab)).setRegistryName(block.getRegistryName()));
 	}
-
-	public static void registerRender(Block block, int meta, String fileName)
-	{
-		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), meta,
-				new ModelResourceLocation(new ResourceLocation(Info.MODID, fileName), "inventory"));
-		Info.LOG.info("Registered render for " + block.getUnlocalizedName().substring(5));
-	}
-
 }

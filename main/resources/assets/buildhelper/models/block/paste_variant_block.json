@@ -1,7 +1,7 @@
 {
     "__comment": "Model by Aaron Edmistone",
     "textures": {
-        "paste_block": "buildhelper:blocks/paste_variant_block"
+        "paste_block": "buildhelper:block/paste_variant_block"
     },
     "display": {
         "gui": {

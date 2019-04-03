@@ -4,20 +4,14 @@ import com.edmistone.buildhelper.registry.events.EventsServer;
 
 import net.minecraftforge.common.MinecraftForge;
 
-/** Server proxy for registering server-only things */
+/** Server proxy for registering server-only things 
+ *  @author Aaron Edmistone */
 public class ServerProxy extends CommonProxy
 {
-
 	@Override
-	public void preInit()
+	public void hookEvents()
 	{
-		super.preInit();
-	}
-
-	@Override
-	public void init()
-	{
-		super.init();
+		super.hookEvents();
 		
 		//register events for the server only
 		MinecraftForge.EVENT_BUS.register(EventsServer.instance);

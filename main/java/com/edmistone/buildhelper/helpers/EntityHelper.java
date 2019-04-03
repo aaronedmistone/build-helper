@@ -5,7 +5,8 @@ import javax.vecmath.Vector3f;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
 
-/** Helper functions for Entity class */
+/** Helper functions for Entity class 
+ * @author Aaron Edmistone */
 public class EntityHelper
 {
 	public enum Direction
@@ -19,7 +20,7 @@ public class EntityHelper
 	/** Returns the direction as an integer (0123, NESW, +Z-X-Z+Z, etc.) */
 	public static int getDirectionInteger(Entity entity)
 	{
-		return MathHelper.floor_double((double)((entity.rotationYaw * 4F) / 360F) + 0.5D) & 3;
+		return MathHelper.floor((double)((entity.rotationYaw * 4F) / 360F) + 0.5D) & 3;
 	}
 	
 	/** Returns the direction of the given entity */

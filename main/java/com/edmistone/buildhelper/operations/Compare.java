@@ -2,7 +2,8 @@ package com.edmistone.buildhelper.operations;
 
 import net.minecraft.util.math.BlockPos;
 
-/** Contains comparison functions */
+/** Contains comparison functions 
+ *  @author Aaron Edmistone */
 public class Compare
 {
 	/** Checks if the XYZ of the given BlockPos objects are equal */

@@ -2,15 +2,17 @@ package com.edmistone.buildhelper.operations;
 
 import java.util.List;
 import javax.vecmath.Vector3d;
+
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 
-/** Contains methods for rendering shapes, lines, images, etc. */
+/** Contains methods for rendering shapes, lines, images, etc. 
+ *  @author Aaron Edmistone */
 public class Render
 {
 	/** Draws a line between the given points, with the given color (does not setup lighting, blending, etc.)*/
-	public static void DrawLine(VertexBuffer vertexBuffer, Tessellator tessellator,
+	public static void DrawLine(BufferBuilder vertexBuffer, Tessellator tessellator,
 			Vector3d begin, Vector3d end,
 			int R, int G, int B, int A)
 	{
@@ -18,7 +20,7 @@ public class Render
 	}
 	
 	/** Draws a line between the given points, with the given color (does not setup lighting, blending, etc.)*/
-	public static void DrawLine(VertexBuffer vertexbuffer, Tessellator tessellator,
+	public static void DrawLine(BufferBuilder vertexbuffer, Tessellator tessellator,
 			double startX, double startY, double startZ,
 			double endX, double endY, double endZ,
 			int R, int G, int B, int A)
@@ -31,7 +33,7 @@ public class Render
 	
 	/** Draws a polygon (not filled) using the given points (not automatically closed)
 	 *  with the given color (does not setup lighting, blending, etc.)*/
-	public static void DrawPolygon(VertexBuffer vertexbuffer, Tessellator tessellator, List<Vector3d> points, int R, int G, int B, int A)
+	public static void DrawPolygon(BufferBuilder vertexbuffer, Tessellator tessellator, List<Vector3d> points, int R, int G, int B, int A)
 	{
 		vertexbuffer.begin(3, DefaultVertexFormats.POSITION_COLOR);
 		

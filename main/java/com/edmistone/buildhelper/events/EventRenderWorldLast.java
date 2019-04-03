@@ -9,12 +9,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 
+/** @author Aaron Edmistone */
 public class EventRenderWorldLast
 {
 	/** Fired during renderWorldPass at the end, before the hand is rendered */
 	public static void onRenderWorldLast(RenderWorldLastEvent event)
 	{
-		Entity player = Minecraft.getMinecraft().thePlayer;
+		Entity player = Minecraft.getInstance().player;
 		Vector3f accuratePosition = EntityHelper.getTruePosition(player, event.getPartialTicks());
 		Vector3f translation = new Vector3f();
 		translation.x = accuratePosition.x - 0.5f;

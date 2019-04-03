@@ -2,11 +2,14 @@ package com.edmistone.buildhelper.items;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import com.edmistone.buildhelper.Info;
 import com.edmistone.buildhelper.operations.Chat;
 import com.edmistone.buildhelper.registry.Sounds;
 
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -17,16 +20,19 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
 /** Symmetry tool is used to place lines of symmetry in the world
- *  that can be used to build multiple blocks at once */
+ *  that can be used to build multiple blocks at once 
+ *  @author Aaron Edmistone */
 public class ItemSymmetryTool extends Item
 {
-	public ItemSymmetryTool(String unlocalizedName, String registryName)
+	public ItemSymmetryTool(String registryName)
 	{
-		this.setUnlocalizedName(unlocalizedName);
+		super(new Properties().group(Info.TAB));
 		this.setRegistryName(new ResourceLocation(Info.MODID, registryName));
 	}
 	
@@ -39,20 +45,20 @@ public class ItemSymmetryTool extends Item
 	}
 	
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(ItemStack itemStack, World world, EntityPlayer player, EnumHand hand)
+	public ActionResult<ItemStack> onItemRightClick (World world, EntityPlayer player, EnumHand hand)
 	{		
 		NBTTagCompound playerTags = player.getEntityData();
-		int newMode = playerTags.getInteger("SymmetryMode") + 1;
+		int newMode = playerTags.getInt("SymmetryMode") + 1;
 		
 		if(newMode >= SymmetryMode.values().length)
 			newMode = 0;
 		
-		playerTags.setInteger("SymmetryMode", newMode);
-		playerTags.setFloat("SymmetryPosX", newMode == 0 ? 0 : MathHelper.floor_float((float) player.posX));
-		playerTags.setFloat("SymmetryPosY", newMode == 0 ? 0 : MathHelper.floor_float((float) player.posY));
-		playerTags.setFloat("SymmetryPosZ", newMode == 0 ? 0 : MathHelper.floor_float((float) player.posZ));
+		playerTags.setInt("SymmetryMode", newMode);
+		playerTags.setFloat("SymmetryPosX", newMode == 0 ? 0 : MathHelper.floor(player.posX));
+		playerTags.setFloat("SymmetryPosY", newMode == 0 ? 0 : MathHelper.floor(player.posY));
+		playerTags.setFloat("SymmetryPosZ", newMode == 0 ? 0 : MathHelper.floor(player.posZ));
 		
-		player.writeToNBTAtomically(playerTags);
+		player.writeUnlessRemoved(playerTags);
 		
 		if(world.isRemote)
 		{
@@ -67,13 +73,13 @@ public class ItemSymmetryTool extends Item
 			Chat.send(player, "Symmetry mode set to " + SymmetryMode.values()[newMode].name());
 		}
 		
-		return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemStack); 
+		return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
 	}
-
+	
 	@Override
-	public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
-	{
-		super.addInformation(stack, playerIn, tooltip, advanced);
-		tooltip.add(TextFormatting.AQUA + I18n.format("symmetry_tool.tooltip"));
+	public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn)
+	{		
+		super.addInformation(stack, worldIn, tooltip, flagIn);
+		tooltip.add(new TextComponentString(TextFormatting.AQUA + I18n.format("symmetry_tool.tooltip")));
 	}
 }

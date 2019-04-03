@@ -1,6 +1,10 @@
 # Build Helper
 #### A mod for Minecraft intended as an introduction to Java.
 
+### This is for FORGE v1.10.2 you can find my update to
+# **_MINECRAFT FORGE v1.13.2_** [ON ANOTHER BRANCH](https://github.com/aaronedmistone/build-helper/tree/forge-1.13.x)
+### It is a WIP as I am waiting on some fixes as Forge v1.13.2 is still buggy
+
 ## Goals of this project:
 1. Create a **Minecraft** mod that is useful and unique
 2. Learn some **Java** intrinsic qualities and drawbacks

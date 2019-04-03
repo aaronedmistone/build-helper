@@ -12,7 +12,7 @@
 ## Where is the source?:
 You will find the bulk of the source here:
 
-#### [**main → java → com → edmistone → buildhelper**](https://github.com/aaronedmistone/build-helper/tree/master/main/java/com/edmistone/buildhelper)
+#### [**main → java → com → edmistone → buildhelper**](https://github.com/aaronedmistone/build-helper/tree/forge-1.13.x/main/java/com/edmistone/buildhelper)
 
 ## What are the features of the mod?
 1. **Symmetry Tool:** Using this tool you can place lines of symmetry (in multiple forms) that then allow symmetrical building automatically with the given center and symmetry line/s.

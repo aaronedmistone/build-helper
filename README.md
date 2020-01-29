@@ -1,8 +1,7 @@
 # Build Helper
 #### A mod for Minecraft intended as an introduction to Java.
 
-### This is for FORGE v1.10.2 and developement will no longer continue on this branch.
-# **_MINECRAFT FORGE v1.15.2_** [ON ANOTHER BRANCH](https://github.com/aaronedmistone/build-helper/tree/forge-1.15.x)
+## This is for FORGE v1.15.2
 
 ## Goals of this project:
 1. Create a **Minecraft** mod that is useful and unique
@@ -12,7 +11,7 @@
 ## Where is the source?:
 You will find the bulk of the source here:
 
-#### [**main → java → com → edmistone → buildhelper**](https://github.com/aaronedmistone/build-helper/tree/master/main/java/com/edmistone/buildhelper)
+#### [**main → java → com → edmistone → buildhelper**](https://github.com/aaronedmistone/build-helper/tree/forge-1.15.x/main/java/com/edmistone/buildhelper)
 
 ## What are the features of the mod?
 1. **Symmetry Tool:** Using this tool you can place lines of symmetry (in multiple forms) that then allow symmetrical building automatically with the given center and symmetry line/s.

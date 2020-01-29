@@ -1,5 +1,5 @@
 {
 	"variants": {
-		"normal": { "model": "buildhelper:copy_block" }
+		"": { "model": "buildhelper:block/copy_block" }
 	}
 }

@@ -7,15 +7,16 @@ import org.lwjgl.opengl.GL11;
 import com.edmistone.buildhelper.items.ItemSymmetryTool.SymmetryMode;
 import com.edmistone.buildhelper.operations.Render;
 
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 
-/** Rendering for symmetry system */
+/** Rendering for symmetry system 
+ *  @author Aaron Edmistone */
 public class RenderSymmetryMode
 {
 	/** Renders the symmetry lines based on the current symmetry mode of the player */
@@ -28,7 +29,7 @@ public class RenderSymmetryMode
 		float my = playerTags.getFloat("SymmetryPosY");
 		float mz = playerTags.getFloat("SymmetryPosZ");
 		
-		SymmetryMode symmetryMode = SymmetryMode.values()[playerTags.getInteger("SymmetryMode")];
+		SymmetryMode symmetryMode = SymmetryMode.values()[playerTags.getInt("SymmetryMode")];
 		boolean showNorthSouth =
 				symmetryMode == SymmetryMode.NorthSouth || symmetryMode == SymmetryMode.Both;
 		boolean showEastWest =
@@ -38,10 +39,10 @@ public class RenderSymmetryMode
 			return;
 		
 		GlStateManager.pushMatrix();
-		GlStateManager.translate(-translation.x, -translation.y, -translation.z);
+		GlStateManager.translatef(-translation.x, -translation.y, -translation.z);
 	    GlStateManager.enableRescaleNormal();
 	    Tessellator tessellator = Tessellator.getInstance();
-	    VertexBuffer vertexBuffer = tessellator.getBuffer();
+	    BufferBuilder vertexBuffer = tessellator.getBuffer();
 		
 		GlStateManager.disableTexture2D();
 	    GlStateManager.disableLighting();

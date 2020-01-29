@@ -1,6 +1,6 @@
 {
 	"parent": "item/handheld",
 	"textures": {
-		"layer0": "buildhelper:items/symmetry_tool"
+		"layer0": "buildhelper:item/symmetry_tool"
 	}
 }

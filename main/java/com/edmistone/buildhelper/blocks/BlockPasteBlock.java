@@ -1,7 +1,5 @@
 package com.edmistone.buildhelper.blocks;
 
-import javax.annotation.Nullable;
-
 import com.edmistone.buildhelper.Info;
 import com.edmistone.buildhelper.helpers.TagHelper;
 import com.edmistone.buildhelper.operations.Clone;
@@ -22,26 +20,30 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.Explosion;
+import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 
 /** Paste Block when placed and activated with a build tool will clone the copy region (if set)
- *  to the paste block location in the shown direction (paste blocks visually show the direction)*/
+ *  to the paste block location in the shown direction (paste blocks visually show the direction)
+ *  @author Aaron Edmistone */
 public class BlockPasteBlock extends Block
 {
+	protected static VoxelShape SHAPE = Block.makeCuboidShape(5.0D, 5.0D, 5.0D, 11.0D, 10.0D, 11.0D);
+	
 	public BlockPasteBlock(String unlocalizedName)
 	{
-		super(Material.GROUND);
-		this.setUnlocalizedName(unlocalizedName);
+		super(Properties.create(Material.GROUND).hardnessAndResistance(1, 20));
 		this.setRegistryName(new ResourceLocation(Info.MODID, unlocalizedName));
-		this.setHardness(1);
-		this.setResistance(20);
 	}
 	
 	@Override
-    public boolean isOpaqueCube(IBlockState state)
+    public boolean isNormalCube(IBlockState state)
 	{
         return false;
     }
@@ -51,6 +53,14 @@ public class BlockPasteBlock extends Block
     {
         return false;
     }
+    
+    @Override
+    public VoxelShape getShape(IBlockState state, IBlockReader worldIn, BlockPos pos)
+    {
+        Vec3d vec3d = state.getOffset(worldIn, pos);
+        SHAPE = Block.makeCuboidShape(0.0D, 0.0D, 0.0D, 15.0D, 7.0D, 15.0D);
+        return SHAPE.withOffset(vec3d.x, vec3d.y, vec3d.z);
+     }
     
     public boolean useVariantClone()
     {
@@ -66,24 +76,24 @@ public class BlockPasteBlock extends Block
 		for(EntityPlayer player : world.playerEntities)
 		{
 			NBTTagCompound tagEntityData = player.getEntityData();
-			NBTTagList pasteBlocks = tagEntityData.getTagList("PasteBlocks", 10);
+			NBTTagList pasteBlocks = tagEntityData.getList("PasteBlocks", 10);
 			
 			if(pasteBlocks == null)
 				pasteBlocks = new NBTTagList();
 			
-			for (int i = 0; i < pasteBlocks.tagCount(); i++)
+			for (int i = 0; i < pasteBlocks.toArray().length; i++)
 			{
-				BlockPos currentBlockPos = TagHelper.ReadBlockPos(pasteBlocks.getCompoundTagAt(i));
+				BlockPos currentBlockPos = TagHelper.ReadBlockPos(pasteBlocks.getCompound(i));
 				if(Compare.BlockPosIsEqual(currentBlockPos, pos))
 				{
 					pasteBlocks.removeTag(i);
-					player.addChatMessage(new TextComponentString(TextFormatting.RED + ">Removed paste block"));
+					player.sendMessage(new TextComponentString(TextFormatting.RED + ">Removed paste block"));
 					break;
 				}
 			}
 			
 			tagEntityData.setTag("PasteBlocks", pasteBlocks);
-			player.writeToNBTAtomically(tagEntityData);
+			player.writeUnlessRemoved(tagEntityData);
 		}
 	}
 	
@@ -95,27 +105,27 @@ public class BlockPasteBlock extends Block
 			return;
 		
 		NBTTagCompound tagEntityData = placer.getEntityData();
-		NBTTagList pasteBlocks = tagEntityData.getTagList("PasteBlocks", 10);
+		NBTTagList pasteBlocks = tagEntityData.getList("PasteBlocks", 10);
 		
 		if(pasteBlocks == null)
 			pasteBlocks = new NBTTagList();
 		
-		if(pasteBlocks.tagCount() >= 1)
+		if(pasteBlocks.toArray().length >= 1)
 		{
-			for (int i = pasteBlocks.tagCount()-1; i >= 0; i--)
+			for (int i = pasteBlocks.toArray().length-1; i >= 0; i--)
 			{
-				BlockPos currentBlockPos = TagHelper.ReadBlockPos(pasteBlocks.getCompoundTagAt(i));
+				BlockPos currentBlockPos = TagHelper.ReadBlockPos(pasteBlocks.getCompound(i));
 				pasteBlocks.removeTag(i);
 				worldIn.destroyBlock(currentBlockPos, true);
 			}
 			
-			placer.addChatMessage(new TextComponentString(TextFormatting.RED + ">Destroyed old paste block"));
+			placer.sendMessage(new TextComponentString(TextFormatting.RED + ">Destroyed old paste block"));
 		}
 		
-		pasteBlocks.appendTag(TagHelper.BlockPosToCompoundTag(pos));
+		pasteBlocks.add(TagHelper.BlockPosToCompoundTag(pos));
 		
 		tagEntityData.setTag("PasteBlocks", pasteBlocks);
-		placer.writeToNBTAtomically(tagEntityData);
+		placer.writeUnlessRemoved(tagEntityData);
 	}
 	
 	/** If the activating player is holding the build tool, pastes the copy region */
@@ -129,20 +139,20 @@ public class BlockPasteBlock extends Block
 		
 		if (player.getHeldItem(hand).getItem() == Items.buildTool)
 		{
-			player.worldObj.playSound(
+			player.world.playSound(
 					player,
 					player.getPosition(),
 					Sounds.BUILD_TOOL_USE,
 					SoundCategory.PLAYERS,
 					0.5F,
-					player.worldObj.rand.nextFloat() * 0.1F + 0.9F);
+					player.world.rand.nextFloat() * 0.1F + 0.9F);
 			
-			if(player.worldObj.isRemote)
+			if(player.world.isRemote)
 				return;
 			
 			NBTTagCompound tagEntityData = player.getEntityData();
-			NBTTagList copyBlocks = tagEntityData.getTagList("CopyBlocks", 10);
-			NBTTagList pasteBlocks = tagEntityData.getTagList("PasteBlocks", 10);
+			NBTTagList copyBlocks = tagEntityData.getList("CopyBlocks", 10);
+			NBTTagList pasteBlocks = tagEntityData.getList("PasteBlocks", 10);
 			
 			if(copyBlocks == null)
 				copyBlocks = new NBTTagList();
@@ -150,32 +160,32 @@ public class BlockPasteBlock extends Block
 			if(pasteBlocks == null)
 				pasteBlocks = new NBTTagList();
 			
-			if(copyBlocks.tagCount() == 2 && pasteBlocks.tagCount() == 1)
+			if(copyBlocks.toArray().length == 2 && pasteBlocks.toArray().length == 1)
 			{
-				BlockPos pasteBlockPos = TagHelper.ReadBlockPos(pasteBlocks.getCompoundTagAt(0));
+				BlockPos pasteBlockPos = TagHelper.ReadBlockPos(pasteBlocks.getCompound(0));
 				pasteBlocks.removeTag(0);
-				player.worldObj.destroyBlock(pasteBlockPos, true);
+				player.world.destroyBlock(pasteBlockPos, true);
 				
 				Clone.clone(
-						TagHelper.ReadBlockPos(copyBlocks.getCompoundTagAt(0)),
-						TagHelper.ReadBlockPos(copyBlocks.getCompoundTagAt(1)).add(0,50,0),
+						TagHelper.ReadBlockPos(copyBlocks.getCompound(0)),
+						TagHelper.ReadBlockPos(copyBlocks.getCompound(1)).add(0,50,0),
 						pasteBlockPos,
 						Clone.CloneMode.FORCE,
 						player,
-						player.worldObj,
+						player.world,
 						useVariantClone());
 			}
 		}
 	}
 	
 	@Override
-	public void onBlockDestroyedByPlayer(World worldIn, BlockPos pos, IBlockState state)
+	public void onPlayerDestroy(IWorld worldIn, BlockPos pos, IBlockState state)
     {
-		handleBlockDestroyed(worldIn, pos);
+		handleBlockDestroyed(worldIn.getWorld(), pos);
     }
 	
 	@Override
-	public void onBlockDestroyedByExplosion(World worldIn, BlockPos pos, Explosion explosionIn)
+	public void onExplosionDestroy(World worldIn, BlockPos pos, Explosion explosionIn)
     {
 		handleBlockDestroyed(worldIn, pos);
     }
@@ -193,8 +203,8 @@ public class BlockPasteBlock extends Block
     }
 	
 	@Override
-	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player,
-			EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ)
+	public boolean onBlockActivated(IBlockState state, World worldIn, BlockPos pos, EntityPlayer player,
+			EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
 	{
 		handleBlockActivated(player, hand, pos);
 		return false;

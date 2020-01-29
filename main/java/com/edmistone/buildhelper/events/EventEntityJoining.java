@@ -6,6 +6,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 
+/** @author Aaron Edmistone */
 public class EventEntityJoining
 {
 	/** Fires when any entity joins the world **/

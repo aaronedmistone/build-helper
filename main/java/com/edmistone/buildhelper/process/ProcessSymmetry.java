@@ -8,11 +8,13 @@ import com.edmistone.buildhelper.operations.Calculate;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-/** Processing for symmetry system */
+/** Processing for symmetry system 
+ *  @author Aaron Edmistone */
 public class ProcessSymmetry
 {
 	/** Clear any player data related to the symmetry system */
@@ -21,8 +23,8 @@ public class ProcessSymmetry
 		playerData.setFloat("SymmetryPosX", 0);
 		playerData.setFloat("SymmetryPosY", 0);
 		playerData.setFloat("SymmetryPosZ", 0);
-		playerData.setInteger("SymmetryMode", 0);
-		player.writeToNBTAtomically(playerData);
+		playerData.setInt("SymmetryMode", 0);
+		player.writeUnlessRemoved(playerData);
 	}
 	
 	/** Process any blocks being placed or removed that are affected by the symmetry system */
@@ -31,7 +33,7 @@ public class ProcessSymmetry
 		 if (world.isRemote)
 		    	return;
 		    
-	    SymmetryMode symmetryMode = SymmetryMode.values()[playerData.getInteger("SymmetryMode")];
+	    SymmetryMode symmetryMode = SymmetryMode.values()[playerData.getInt("SymmetryMode")];
 	    
 	    if(symmetryMode == SymmetryMode.None)
 	    	return;
@@ -69,7 +71,7 @@ public class ProcessSymmetry
 					}
 					else
 					{
-						world.setBlockToAir(pastePos);
+						world.setBlockState(pastePos, Blocks.AIR.getDefaultState(), 3);
 					}
 				}
 			}
@@ -88,7 +90,7 @@ public class ProcessSymmetry
 					}
 					else
 					{
-						world.setBlockToAir(pastePos);
+						world.setBlockState(pastePos, Blocks.AIR.getDefaultState(), 3);
 					}
 				}
 			}
@@ -111,7 +113,7 @@ public class ProcessSymmetry
 					}
 					else
 					{
-						world.setBlockToAir(pastePos);
+						world.setBlockState(pastePos, Blocks.AIR.getDefaultState(), 3);
 					}
 				}
 			}
@@ -130,7 +132,7 @@ public class ProcessSymmetry
 					}
 					else
 					{
-						world.setBlockToAir(pastePos);
+						world.setBlockState(pastePos, Blocks.AIR.getDefaultState(), 3);
 					}
 				}
 			}
@@ -148,7 +150,7 @@ public class ProcessSymmetry
 				}
 				else
 				{
-					world.setBlockToAir(pastePos);
+					world.setBlockState(pastePos, Blocks.AIR.getDefaultState(), 3);
 				}
 			}
 		}

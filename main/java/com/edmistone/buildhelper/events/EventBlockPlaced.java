@@ -9,13 +9,14 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.event.world.BlockEvent;
 
+/** @author Aaron Edmistone */
 public class EventBlockPlaced
 {
 	/** Fires when any block is placed in the world **/
 	public static void onBlockPlaced(BlockEvent.PlaceEvent event)
 	{
 		EntityPlayer player = event.getPlayer();
-		World world = event.getWorld();
+		World world = event.getWorld().getWorld();
 	    NBTTagCompound playerTags = player.getEntityData();
 	    BlockPos blockPos = event.getPos();
 	    IBlockState block = event.getPlacedBlock();

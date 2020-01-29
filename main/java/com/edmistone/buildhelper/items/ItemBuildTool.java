@@ -1,28 +1,35 @@
 package com.edmistone.buildhelper.items;
 
 import java.util.List;
+
+import javax.annotation.Nullable;
+
 import com.edmistone.buildhelper.Info;
 
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.world.World;
 
-/** Build tool is currently only used for activating Build Helper mod blocks */
+/** Build tool is currently only used for activating Build Helper mod blocks 
+ * @author Aaron Edmistone */
 public class ItemBuildTool extends Item
 {
-	public ItemBuildTool(String unlocalizedName, String registryName)
+	public ItemBuildTool(String registryName)
 	{
-		this.setUnlocalizedName(unlocalizedName);
+		super(new Properties().group(Info.TAB));
 		this.setRegistryName(new ResourceLocation(Info.MODID, registryName));
 	}
 
 	@Override
-	public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
+	public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn)
 	{		
-		super.addInformation(stack, playerIn, tooltip, advanced);
-		tooltip.add(TextFormatting.AQUA + I18n.format("build_tool.tooltip"));
+		super.addInformation(stack, worldIn, tooltip, flagIn);
+		tooltip.add(new TextComponentString(TextFormatting.AQUA + I18n.format("build_tool.tooltip")));
 	}
 }

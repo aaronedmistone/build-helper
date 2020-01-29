@@ -2,11 +2,12 @@ package com.edmistone.buildhelper.tabs;
 
 import com.edmistone.buildhelper.registry.Items;
 
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
 
-/** Main mod tab for creative mode */
-public class TabMain extends CreativeTabs
+/** Main mod tab for creative mode 
+ *  @author Aaron Edmistone */
+public class TabMain extends ItemGroup
 {
 	public TabMain()
 	{
@@ -14,8 +15,8 @@ public class TabMain extends CreativeTabs
 	}
 	
 	@Override
-	public Item getTabIconItem()
+	public ItemStack createIcon()
 	{
-		return Items.buildTool;
+		return new ItemStack(Items.buildTool);
 	}
 }

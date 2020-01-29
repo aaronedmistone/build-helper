@@ -1,7 +1,5 @@
 package com.edmistone.buildhelper.blocks;
 
-import javax.annotation.Nullable;
-
 import com.edmistone.buildhelper.Info;
 import com.edmistone.buildhelper.helpers.TagHelper;
 import com.edmistone.buildhelper.operations.Chat;
@@ -25,19 +23,18 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.Explosion;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 
 /** Copy Block can be placed on 2 sides (in a diagonal line) of a section to be copied/rotated.
- *  Sections can be pasted using a paste block or rotated by using build tool on the copy block.*/
+ *  Sections can be pasted using a paste block or rotated by using build tool on the copy block.
+ *  @author Aaron Edmistone */
 public class BlockCopyBlock extends Block
 {
 	public BlockCopyBlock(String unlocalizedName)
-	{
-		super(Material.GROUND);
-		this.setUnlocalizedName(unlocalizedName);
+	{		
+		super(Properties.create(Material.GROUND).hardnessAndResistance(1, 20));
 		this.setRegistryName(new ResourceLocation(Info.MODID, unlocalizedName));
-		this.setHardness(1);
-		this.setResistance(20);
 	}
 	
 	/** Removes this copy block data if assigned to any player*/
@@ -49,14 +46,14 @@ public class BlockCopyBlock extends Block
 		for(EntityPlayer player : world.playerEntities)
 		{
 			NBTTagCompound tagEntityData = player.getEntityData();
-			NBTTagList copyBlocks = tagEntityData.getTagList("CopyBlocks", 10);
+			NBTTagList copyBlocks = tagEntityData.getList("CopyBlocks", 10);
 			
 			if(copyBlocks == null)
 				copyBlocks = new NBTTagList();
 			
-			for (int i = 0; i < copyBlocks.tagCount(); i++)
+			for (int i = 0; i < copyBlocks.toArray().length; i++)
 			{
-				BlockPos currentBlockPos = TagHelper.ReadBlockPos(copyBlocks.getCompoundTagAt(i));
+				BlockPos currentBlockPos = TagHelper.ReadBlockPos(copyBlocks.getCompound(i));
 				if(Compare.BlockPosIsEqual(currentBlockPos, pos))
 				{
 					copyBlocks.removeTag(i);
@@ -66,7 +63,7 @@ public class BlockCopyBlock extends Block
 			}
 			
 			tagEntityData.setTag("CopyBlocks", copyBlocks);
-			player.writeToNBTAtomically(tagEntityData);
+			player.writeUnlessRemoved(tagEntityData);
 		}
 	}
 	
@@ -78,27 +75,27 @@ public class BlockCopyBlock extends Block
 			return;
 		
 		NBTTagCompound tagEntityData = placer.getEntityData();
-		NBTTagList copyBlocks = tagEntityData.getTagList("CopyBlocks", 10);
+		NBTTagList copyBlocks = tagEntityData.getList("CopyBlocks", 10);
 		
 		if(copyBlocks == null)
 			copyBlocks = new NBTTagList();
 		
-		if(copyBlocks.tagCount() >= 2)
+		if(copyBlocks.toArray().length >= 2)
 		{
-			for (int i = copyBlocks.tagCount()-1; i >= 0; i--)
+			for (int i = copyBlocks.toArray().length-1; i >= 0; i--)
 			{
-				BlockPos currentBlockPos = TagHelper.ReadBlockPos(copyBlocks.getCompoundTagAt(i));
+				BlockPos currentBlockPos = TagHelper.ReadBlockPos(copyBlocks.getCompound(i));
 				copyBlocks.removeTag(i);
 				worldIn.destroyBlock(currentBlockPos, true);
 			}
 			Chat.send(placer, ">Destroyed old copy blocks", TextFormatting.RED);
 		}
 		
-		copyBlocks.appendTag(TagHelper.BlockPosToCompoundTag(pos));
-		Chat.send(placer, "Added new copy block [" + copyBlocks.tagCount() + "/2]", TextFormatting.BLUE);
+		copyBlocks.add(TagHelper.BlockPosToCompoundTag(pos));
+		Chat.send(placer, "Added new copy block [" + copyBlocks.toArray().length + "/2]", TextFormatting.BLUE);
 		
 		tagEntityData.setTag("CopyBlocks", copyBlocks);
-		placer.writeToNBTAtomically(tagEntityData);
+		placer.writeUnlessRemoved(tagEntityData);
 	}
 	
 	
@@ -113,42 +110,42 @@ public class BlockCopyBlock extends Block
 		
 		if (player.getHeldItem(hand).getItem() == Items.buildTool)
 		{	
-			player.worldObj.playSound(
+			player.world.playSound(
 					player,
 					player.getPosition(),
 					Sounds.BUILD_TOOL_ROTATE,
 					SoundCategory.PLAYERS,
 					0.5F,
-					player.worldObj.rand.nextFloat() * 0.1F + 0.9F);
+					player.world.rand.nextFloat() * 0.1F + 0.9F);
 			
-			if(player.worldObj.isRemote)
+			if(player.world.isRemote)
 				return;
 			
 			NBTTagCompound tagEntityData = player.getEntityData();
-			NBTTagList copyBlocks = tagEntityData.getTagList("CopyBlocks", 10);
+			NBTTagList copyBlocks = tagEntityData.getList("CopyBlocks", 10);
 			
 			if(copyBlocks == null)
 				copyBlocks = new NBTTagList();
 			
-			if(copyBlocks.tagCount() == 2)
+			if(copyBlocks.toArray().length == 2)
 			{
 				Rotate.rotate(
-						TagHelper.ReadBlockPos(copyBlocks.getCompoundTagAt(0)),
-						TagHelper.ReadBlockPos(copyBlocks.getCompoundTagAt(1)).add(0,50,0),
+						TagHelper.ReadBlockPos(copyBlocks.getCompound(0)),
+						TagHelper.ReadBlockPos(copyBlocks.getCompound(1)).add(0,50,0),
 						player,
-						player.worldObj);
+						player.world);
 			}
 		}
 	}
 	
 	@Override
-	public void onBlockDestroyedByPlayer(World worldIn, BlockPos pos, IBlockState state)
+	public void onPlayerDestroy(IWorld worldIn, BlockPos pos, IBlockState state)
     {
-		handleBlockDestroyed(worldIn, pos);
+		handleBlockDestroyed(worldIn.getWorld(), pos);
     }
 	
 	@Override
-	public void onBlockDestroyedByExplosion(World worldIn, BlockPos pos, Explosion explosionIn)
+	public void onExplosionDestroy(World worldIn, BlockPos pos, Explosion explosionIn)
     {
 		handleBlockDestroyed(worldIn, pos);
     }
@@ -166,8 +163,8 @@ public class BlockCopyBlock extends Block
     }
 	
 	@Override
-	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player,
-			EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ)
+	public boolean onBlockActivated(IBlockState state, World worldIn, BlockPos pos, EntityPlayer player,
+			EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
 	{
 		handleBlockActivated(player, hand, pos);
 		return false;

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.edmistone.buildhelper.helpers.BlockHelper;
-import com.edmistone.buildhelper.helpers.StructureBoundingBoxHelper;
+import com.edmistone.buildhelper.helpers.MutableBoundingBoxHelper;
 import com.google.common.collect.Lists;
 
 import net.minecraft.block.state.IBlockState;
@@ -15,13 +15,13 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MutableBoundingBox;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.structure.StructureBoundingBox;
 
-/** Contains methods for cloning blocks, entities and other things */
+/** Contains methods for cloning blocks, entities and other things 
+ *  @author Aaron Edmistone */
 public class Clone
 {
 	public enum CloneMode
@@ -34,27 +34,27 @@ public class Clone
 	/** Clones region of source to destination. Modified version of the clone command method. */
 	public static void clone(BlockPos sourceBlockPosStart, BlockPos sourceBlockPosEnd, BlockPos destinationBlockPos, CloneMode cloneMode, EntityPlayer player, World world, boolean variant)
 	{
-		StructureBoundingBox sourceBoundingBox = StructureBoundingBoxHelper.reduceBoundingBox(new StructureBoundingBox(sourceBlockPosStart, sourceBlockPosEnd));
-        StructureBoundingBox destinationBoundingBox = new StructureBoundingBox(destinationBlockPos, destinationBlockPos.add(sourceBoundingBox.getLength()));
+		MutableBoundingBox sourceBoundingBox = MutableBoundingBoxHelper.reduceBoundingBox(new MutableBoundingBox(sourceBlockPosStart, sourceBlockPosEnd));
+		MutableBoundingBox destinationBoundingBox = new MutableBoundingBox(destinationBlockPos, destinationBlockPos.add(sourceBoundingBox.getLength()));
         
         int totalBlocks = sourceBoundingBox.getXSize() * sourceBoundingBox.getYSize() * sourceBoundingBox.getZSize();
 
         if (totalBlocks > 32768)
         {
-        	player.addChatMessage(new TextComponentString(TextFormatting.RED + "BUILD TOOL: Build area too large (> 32768 blocks)"));
+        	player.sendMessage(new TextComponentString(TextFormatting.RED + "BUILD TOOL: Build area too large (> 32768 blocks)"));
         	return;
         }
 
         if (cloneMode != CloneMode.FORCE && cloneMode!= CloneMode.MOVE && sourceBoundingBox.intersectsWith(destinationBoundingBox))
         {
-        	player.addChatMessage(new TextComponentString(TextFormatting.RED + "BUILD TOOL: The destination area is occupied"));
+        	player.sendMessage(new TextComponentString(TextFormatting.RED + "BUILD TOOL: The destination area is occupied"));
         	return;
         }
         	
     	if (sourceBoundingBox.minY < 0 || sourceBoundingBox.maxY >= 256 || destinationBoundingBox.minY < 0 || destinationBoundingBox.maxY >= 256
     			|| !world.isAreaLoaded(sourceBoundingBox) || !world.isAreaLoaded(destinationBoundingBox))
         {
-    		player.addChatMessage(new TextComponentString(TextFormatting.RED + "BUILD TOOL: Out of bounds"));
+    		player.sendMessage(new TextComponentString(TextFormatting.RED + "BUILD TOOL: Out of bounds"));
     		return;
         }
 
@@ -84,11 +84,11 @@ public class Clone
 
                         if (tileentity != null)
                         {
-                            NBTTagCompound nbttagcompound = tileentity.writeToNBT(new NBTTagCompound());
+                            NBTTagCompound nbttagcompound = tileentity.write(new NBTTagCompound());
                             tileEntityBlocks.add(new StaticCloneData(currentDestinationBlock, currentBlockState, nbttagcompound));
                             oldSourceBlocks.addLast(currentSourceBlock);
                         }
-                        else if (!currentBlockState.isFullBlock() && !currentBlockState.isFullCube())
+                        else if (!currentBlockState.isFullCube())
                         {
                             partialBlocks.add(new StaticCloneData(currentDestinationBlock, currentBlockState, (NBTTagCompound)null));
                             oldSourceBlocks.addFirst(currentSourceBlock);
@@ -163,10 +163,10 @@ public class Clone
 
             if (sourceTileEntities.nbt != null && currentSourceTileEntity != null)
             {
-                sourceTileEntities.nbt.setInteger("x", sourceTileEntities.pos.getX());
-                sourceTileEntities.nbt.setInteger("y", sourceTileEntities.pos.getY());
-                sourceTileEntities.nbt.setInteger("z", sourceTileEntities.pos.getZ());
-                currentSourceTileEntity.readFromNBT(sourceTileEntities.nbt);
+                sourceTileEntities.nbt.setInt("x", sourceTileEntities.pos.getX());
+                sourceTileEntities.nbt.setInt("y", sourceTileEntities.pos.getY());
+                sourceTileEntities.nbt.setInt("z", sourceTileEntities.pos.getZ());
+                currentSourceTileEntity.read(sourceTileEntities.nbt);
                 currentSourceTileEntity.markDirty();
             }
 
@@ -175,24 +175,24 @@ public class Clone
 
         for (StaticCloneData currentSourceBlock : allSourceBlocksReversed)
         {
-            world.notifyNeighborsRespectDebug(currentSourceBlock.pos, currentSourceBlock.blockState.getBlock());
+            world.notifyNeighbors(currentSourceBlock.pos, currentSourceBlock.blockState.getBlock());
         }
 
-        List<NextTickListEntry> sourceBlocksPendingUpdate = world.getPendingBlockUpdates(sourceBoundingBox, false);
-
-        if (sourceBlocksPendingUpdate != null)
-        {
-            for (NextTickListEntry currentBlockPendingUpdate : sourceBlocksPendingUpdate)
-            {
-                if (sourceBoundingBox.isVecInside(currentBlockPendingUpdate.position))
-                {
-                    BlockPos destinationBlockPosition = currentBlockPendingUpdate.position.add(sourceDestinationDifference);
-                    world.scheduleBlockUpdate(destinationBlockPosition, currentBlockPendingUpdate.getBlock(), (int)(currentBlockPendingUpdate.scheduledTime - world.getWorldInfo().getWorldTotalTime()), currentBlockPendingUpdate.priority);
-                }
-            }
-        }
+//        List<NextTickListEntry> sourceBlocksPendingUpdate = world.getPendingBlockUpdates(sourceBoundingBox, false);
+//
+//        if (sourceBlocksPendingUpdate != null)
+//        {
+//            for (NextTickListEntry currentBlockPendingUpdate : sourceBlocksPendingUpdate)
+//            {
+//                if (sourceBoundingBox.isVecInside(currentBlockPendingUpdate.position))
+//                {
+//                    BlockPos destinationBlockPosition = currentBlockPendingUpdate.position.add(sourceDestinationDifference);
+//                    world.scheduleBlockUpdate(destinationBlockPosition, currentBlockPendingUpdate.getBlock(), (int)(currentBlockPendingUpdate.scheduledTime - world.getWorldInfo().getWorldTotalTime()), currentBlockPendingUpdate.priority);
+//                }
+//            }
+//        }
         
-        player.addChatMessage(new TextComponentString(
+        player.sendMessage(new TextComponentString(
         		(totalBlocks > 0 ? TextFormatting.GREEN + "BUILD TOOL: Success" : TextFormatting.RED + "BUILD TOOL: Failed") +
         		", cloned " + totalBlocks + " blocks"));
 	}

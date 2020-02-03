@@ -39,7 +39,7 @@
 ## Where is the source?:
 You will find the bulk of the source here:
 
-#### [**main → java → com → edmistone → buildhelper**](https://github.com/aaronedmistone/build-helper/tree/forge-1.15.x/main/java/com/edmistone/buildhelper)
+#### [**main → java → com → edmistone → buildhelper**](https://github.com/aaronedmistone/build-helper/tree/forge-1.15.x/src/main/java/com/edmistone/buildhelper)
 
 ## Notes:
 1. This mod is safe for survival and server use.

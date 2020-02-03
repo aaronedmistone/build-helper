@@ -3,6 +3,34 @@
 
 ## This is for FORGE v1.15.2
 
+## Want to use this mod, or help with the code? This is how.
+
+### Requirements:
+- Java IDE (Eclipse or IntelliJ IDEA)
+
+### A. Clone/Download & Setup
+1. Download and extract the latest (or stable if available) [Minecraft Forge MDK for version 1.15.2](https://files.minecraftforge.net/maven/net/minecraftforge/forge/index_1.15.2.html)
+2. Clone (or download and extract) this repo.
+3. Copy and paste the repo files (`build.gradle` and the `src` folder) into the folder where you extracted the forge MDK.
+4. Open a command prompt or powershell window (or equivalent) from the same folder (or navigate to it in the prompt)
+5. Run the following:
+- Command Prompt (Windows): `gradlew genEclipseRuns` (or genIntellijRuns if using `IntelliJ IDEA`)
+- Powershell (Windows): `.\gradlew genEclipseRuns` (or genIntellijRuns if using `IntelliJ IDEA`)
+6. Open the IDE of your choice (Eclipse or IntelliJ IDEA) and import the gradle project:
+- `Eclipse: File → Import → Existing Gradle Project`
+- `IntelliJ: File → Open → Import a project from an external model → Gradle`
+
+### B. Building the mod
+1. Open a command prompt or powershell window (or equivalent) from the same folder (or navigate to it in the prompt)
+2. Run the following:
+- Command Prompt (Windows): `gradlew build`
+- Powershell (Windows): `.\gradlew build`
+3. This will generate a `buildhelper-1.0.jar` file.
+
+### C. Using the mod (`.jar` file)
+1. Download or build the `buildhelper-1.0.jar` file. (Releases will be available at a later date. Until then just build it)
+2. Follow one of the [many guides](https://minecraft.gamepedia.com/Mods/Installing_Forge_mods) to installing Forge Mods for Minecraft. (Be sure to download/use `Forge 1.15.2` only)
+
 ## Goals of this project:
 1. Create a **Minecraft** mod that is useful and unique
 2. Learn some **Java** intrinsic qualities and drawbacks

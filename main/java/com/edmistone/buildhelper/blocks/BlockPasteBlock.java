@@ -1,28 +1,32 @@
 package com.edmistone.buildhelper.blocks;
 
 import com.edmistone.buildhelper.Info;
+import com.edmistone.buildhelper.helpers.BlockHelper;
 import com.edmistone.buildhelper.helpers.TagHelper;
+import com.edmistone.buildhelper.operations.ChestSearch;
+import com.edmistone.buildhelper.operations.Chat;
 import com.edmistone.buildhelper.operations.Clone;
 import com.edmistone.buildhelper.operations.Compare;
 import com.edmistone.buildhelper.registry.Items;
 import com.edmistone.buildhelper.registry.Sounds;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockReader;
@@ -34,33 +38,25 @@ import net.minecraft.world.World;
  *  @author Aaron Edmistone */
 public class BlockPasteBlock extends Block
 {
-	protected static VoxelShape SHAPE = Block.makeCuboidShape(5.0D, 5.0D, 5.0D, 11.0D, 10.0D, 11.0D);
+	protected static VoxelShape SHAPE = Block.makeCuboidShape(0.0D, 0.0D, 0.0D, 15.0D, 7.0D, 15.0D);//Block.makeCuboidShape(5.0D, 5.0D, 5.0D, 11.0D, 10.0D, 11.0D);
 	
 	public BlockPasteBlock(String unlocalizedName)
 	{
-		super(Properties.create(Material.GROUND).hardnessAndResistance(1, 20));
+		super(Properties.create(Material.CLAY).hardnessAndResistance(1, 20));
 		this.setRegistryName(new ResourceLocation(Info.MODID, unlocalizedName));
 	}
 	
-	@Override
-    public boolean isNormalCube(IBlockState state)
+	public static void clearPasteBlockData(PlayerEntity player, CompoundNBT playerData)
 	{
-        return false;
-    }
-
+		playerData.put("PasteBlocks", new ListNBT());
+		player.writeUnlessRemoved(playerData);
+	}
+	
     @Override
-    public boolean isFullCube(IBlockState state)
+    public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
     {
-        return false;
+        return SHAPE;
     }
-    
-    @Override
-    public VoxelShape getShape(IBlockState state, IBlockReader worldIn, BlockPos pos)
-    {
-        Vec3d vec3d = state.getOffset(worldIn, pos);
-        SHAPE = Block.makeCuboidShape(0.0D, 0.0D, 0.0D, 15.0D, 7.0D, 15.0D);
-        return SHAPE.withOffset(vec3d.x, vec3d.y, vec3d.z);
-     }
     
     public boolean useVariantClone()
     {
@@ -70,66 +66,73 @@ public class BlockPasteBlock extends Block
     /** Removes this paste block data if assigned to any player*/
 	public void handleBlockDestroyed(World world, BlockPos pos)
 	{
-		if(world.isRemote)
-			return;
 		
-		for(EntityPlayer player : world.playerEntities)
+//		if(world.isRemote)
+//			return;
+		
+		for(PlayerEntity player : world.getPlayers())
 		{
-			NBTTagCompound tagEntityData = player.getEntityData();
-			NBTTagList pasteBlocks = tagEntityData.getList("PasteBlocks", 10);
+			CompoundNBT tagEntityData = player.getPersistentData();
+			ListNBT pasteBlocks = tagEntityData.getList("PasteBlocks", 10);
 			
 			if(pasteBlocks == null)
-				pasteBlocks = new NBTTagList();
+				pasteBlocks = new ListNBT();
 			
 			for (int i = 0; i < pasteBlocks.toArray().length; i++)
 			{
 				BlockPos currentBlockPos = TagHelper.ReadBlockPos(pasteBlocks.getCompound(i));
 				if(Compare.BlockPosIsEqual(currentBlockPos, pos))
 				{
-					pasteBlocks.removeTag(i);
-					player.sendMessage(new TextComponentString(TextFormatting.RED + ">Removed paste block"));
+					pasteBlocks.remove(i);
+					
+					if(!world.isRemote)
+						player.sendMessage(new StringTextComponent(TextFormatting.RED + ">Removed paste block"));
+					
 					break;
 				}
 			}
 			
-			tagEntityData.setTag("PasteBlocks", pasteBlocks);
+			tagEntityData.put("PasteBlocks", pasteBlocks);
 			player.writeUnlessRemoved(tagEntityData);
 		}
 	}
 	
 	
 	/** Assigns this paste block to the placer entity and removes old paste block if needed*/
-	public void handleBlockAdded(EntityLivingBase placer, World worldIn, BlockPos pos)
+	public void handleBlockAdded(LivingEntity placer, World worldIn, BlockPos pos)
 	{
-		if(worldIn.isRemote)
-			return;
+//		if(worldIn.isRemote)
+//			return;
 		
-		NBTTagCompound tagEntityData = placer.getEntityData();
-		NBTTagList pasteBlocks = tagEntityData.getList("PasteBlocks", 10);
+		CompoundNBT tagEntityData = placer.getPersistentData();
+		ListNBT pasteBlocks = tagEntityData.getList("PasteBlocks", 10);
 		
 		if(pasteBlocks == null)
-			pasteBlocks = new NBTTagList();
+			pasteBlocks = new ListNBT();
 		
 		if(pasteBlocks.toArray().length >= 1)
 		{
 			for (int i = pasteBlocks.toArray().length-1; i >= 0; i--)
 			{
 				BlockPos currentBlockPos = TagHelper.ReadBlockPos(pasteBlocks.getCompound(i));
-				pasteBlocks.removeTag(i);
-				worldIn.destroyBlock(currentBlockPos, true);
+				pasteBlocks.remove(i);
+				
+				if(!worldIn.isRemote)
+					BlockHelper.DestroyBlockSilently(currentBlockPos, placer, true);
 			}
 			
-			placer.sendMessage(new TextComponentString(TextFormatting.RED + ">Destroyed old paste block"));
+			if(!worldIn.isRemote)
+				placer.sendMessage(new StringTextComponent(TextFormatting.RED + ">Destroyed old paste block"));
 		}
 		
 		pasteBlocks.add(TagHelper.BlockPosToCompoundTag(pos));
 		
-		tagEntityData.setTag("PasteBlocks", pasteBlocks);
+		tagEntityData.put("PasteBlocks", pasteBlocks);
 		placer.writeUnlessRemoved(tagEntityData);
 	}
 	
 	/** If the activating player is holding the build tool, pastes the copy region */
-	public void handleBlockActivated(EntityPlayer player, EnumHand hand, BlockPos pos)
+	public void handleBlockActivated(PlayerEntity player, Hand hand, BlockPos pos)
 	{
 		if(player.getHeldItem(hand) == null)
 			return;
@@ -147,39 +150,69 @@ public class BlockPasteBlock extends Block
 					0.5F,
 					player.world.rand.nextFloat() * 0.1F + 0.9F);
 			
-			if(player.world.isRemote)
-				return;
 			
-			NBTTagCompound tagEntityData = player.getEntityData();
-			NBTTagList copyBlocks = tagEntityData.getList("CopyBlocks", 10);
-			NBTTagList pasteBlocks = tagEntityData.getList("PasteBlocks", 10);
+			
+			CompoundNBT tagEntityData = player.getPersistentData();
+			
+			int symmetryMode = tagEntityData.getInt("SymmetryMode");
+			if(symmetryMode != 0)
+			{
+				if(!player.world.isRemote)
+					Chat.send(player, "<Red>Cannot use paste blocks while in `Symmetry Mode`");
+				return;
+			}
+			
+			ListNBT copyBlocks = tagEntityData.getList("CopyBlocks", 10);
+			ListNBT pasteBlocks = tagEntityData.getList("PasteBlocks", 10);
 			
 			if(copyBlocks == null)
-				copyBlocks = new NBTTagList();
+				copyBlocks = new ListNBT();
 			
 			if(pasteBlocks == null)
-				pasteBlocks = new NBTTagList();
+				pasteBlocks = new ListNBT();
 			
 			if(copyBlocks.toArray().length == 2 && pasteBlocks.toArray().length == 1)
 			{
 				BlockPos pasteBlockPos = TagHelper.ReadBlockPos(pasteBlocks.getCompound(0));
-				pasteBlocks.removeTag(0);
-				player.world.destroyBlock(pasteBlockPos, true);
 				
-				Clone.clone(
+				if(!ChestSearch.containsItemsForClone(
+						true,
+						player.world,
+						player,
+						pasteBlockPos.add(-1,0,0),
 						TagHelper.ReadBlockPos(copyBlocks.getCompound(0)),
 						TagHelper.ReadBlockPos(copyBlocks.getCompound(1)).add(0,50,0),
-						pasteBlockPos,
-						Clone.CloneMode.FORCE,
-						player,
-						player.world,
-						useVariantClone());
+						pasteBlockPos))
+				{
+					if(!player.world.isRemote)
+						Chat.send(player, "<Aqua>You do not have the required parts in a chest attached to the paste block... Check your inventory for a <Gold>book of missing parts!");
+					
+					return;
+				}
+				
+				BlockHelper.DestroyBlockSilently(pasteBlockPos, player, true);
+				pasteBlocks.remove(0);
+				
+				if(!player.world.isRemote)
+				{
+					Clone.clone(
+							TagHelper.ReadBlockPos(copyBlocks.getCompound(0)),
+							TagHelper.ReadBlockPos(copyBlocks.getCompound(1)).add(0,50,0),
+							pasteBlockPos,
+							Clone.CloneMode.FORCE,
+							player,
+							player.world,
+							useVariantClone());
+				}
+				
+				tagEntityData.put("PasteBlocks", pasteBlocks);
+				player.writeUnlessRemoved(tagEntityData);
 			}
 		}
 	}
 	
 	@Override
-	public void onPlayerDestroy(IWorld worldIn, BlockPos pos, IBlockState state)
+	public void onPlayerDestroy(IWorld worldIn, BlockPos pos, BlockState state)
     {
 		handleBlockDestroyed(worldIn.getWorld(), pos);
     }
@@ -191,22 +224,21 @@ public class BlockPasteBlock extends Block
     }
 	
 	@Override
-	public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
+	public void onBlockPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack)
     {
 		handleBlockAdded(placer, worldIn, pos);
     }
 	
 	@Override
-	public void onBlockHarvested(World worldIn, BlockPos pos, IBlockState state, EntityPlayer player)
+	public void onBlockHarvested(World worldIn, BlockPos pos, BlockState state, PlayerEntity player)
     {
 		handleBlockDestroyed(worldIn, pos);
     }
 	
 	@Override
-	public boolean onBlockActivated(IBlockState state, World worldIn, BlockPos pos, EntityPlayer player,
-			EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
+	public ActionResultType onBlockActivated(BlockState blockState, World world, BlockPos blockPos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult)
 	{
-		handleBlockActivated(player, hand, pos);
-		return false;
+		handleBlockActivated(player, hand, blockPos);
+		return ActionResultType.PASS;
 	}
 }

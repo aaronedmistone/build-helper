@@ -10,18 +10,18 @@ import com.edmistone.buildhelper.registry.Sounds;
 
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
@@ -45,18 +45,18 @@ public class ItemSymmetryTool extends Item
 	}
 	
 	@Override
-	public ActionResult<ItemStack> onItemRightClick (World world, EntityPlayer player, EnumHand hand)
+	public ActionResult<ItemStack> onItemRightClick (World world, PlayerEntity player, Hand hand)
 	{		
-		NBTTagCompound playerTags = player.getEntityData();
+		CompoundNBT playerTags = player.getPersistentData();
 		int newMode = playerTags.getInt("SymmetryMode") + 1;
 		
 		if(newMode >= SymmetryMode.values().length)
 			newMode = 0;
 		
-		playerTags.setInt("SymmetryMode", newMode);
-		playerTags.setFloat("SymmetryPosX", newMode == 0 ? 0 : MathHelper.floor(player.posX));
-		playerTags.setFloat("SymmetryPosY", newMode == 0 ? 0 : MathHelper.floor(player.posY));
-		playerTags.setFloat("SymmetryPosZ", newMode == 0 ? 0 : MathHelper.floor(player.posZ));
+		playerTags.putInt("SymmetryMode", newMode);
+		playerTags.putFloat("SymmetryPosX", newMode == 0 ? 0 : MathHelper.floor(player.getPosX()));
+		playerTags.putFloat("SymmetryPosY", newMode == 0 ? 0 : MathHelper.floor(player.getPosY()));
+		playerTags.putFloat("SymmetryPosZ", newMode == 0 ? 0 : MathHelper.floor(player.getPosZ()));
 		
 		player.writeUnlessRemoved(playerTags);
 		
@@ -73,13 +73,13 @@ public class ItemSymmetryTool extends Item
 			Chat.send(player, "Symmetry mode set to " + SymmetryMode.values()[newMode].name());
 		}
 		
-		return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
+		return new ActionResult<ItemStack>(ActionResultType.SUCCESS, player.getHeldItem(hand));
 	}
 	
 	@Override
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn)
 	{		
 		super.addInformation(stack, worldIn, tooltip, flagIn);
-		tooltip.add(new TextComponentString(TextFormatting.AQUA + I18n.format("symmetry_tool.tooltip")));
+		tooltip.add(new StringTextComponent(TextFormatting.AQUA + I18n.format("symmetry_tool.tooltip")));
 	}
 }

@@ -4,12 +4,13 @@ import javax.annotation.Nullable;
 
 import com.edmistone.buildhelper.helpers.BlockHelper;
 import com.edmistone.buildhelper.items.ItemSymmetryTool.SymmetryMode;
-import com.edmistone.buildhelper.operations.Calculate;
+import com.edmistone.buildhelper.operations.ChestSearch;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -18,17 +19,17 @@ import net.minecraft.world.World;
 public class ProcessSymmetry
 {
 	/** Clear any player data related to the symmetry system */
-	public static void clearSymmetryData(EntityPlayer player, NBTTagCompound playerData)
+	public static void clearSymmetryData(PlayerEntity player, CompoundNBT playerData)
 	{
-		playerData.setFloat("SymmetryPosX", 0);
-		playerData.setFloat("SymmetryPosY", 0);
-		playerData.setFloat("SymmetryPosZ", 0);
-		playerData.setInt("SymmetryMode", 0);
+		playerData.putFloat("SymmetryPosX", 0);
+		playerData.putFloat("SymmetryPosY", 0);
+		playerData.putFloat("SymmetryPosZ", 0);
+		playerData.putInt("SymmetryMode", 0);
 		player.writeUnlessRemoved(playerData);
 	}
 	
 	/** Process any blocks being placed or removed that are affected by the symmetry system */
-	public static void processSymmetry(World world, BlockPos blockPos, NBTTagCompound playerData, @Nullable IBlockState block)
+	public static void processSymmetry(World world, BlockPos blockPos, CompoundNBT playerData, @Nullable BlockState block)
 	{
 		 if (world.isRemote)
 		    	return;
@@ -48,7 +49,7 @@ public class ProcessSymmetry
 		float my = playerData.getFloat("SymmetryPosY");
 		float mz = playerData.getFloat("SymmetryPosZ");
 		
-		if(Calculate.distance(new BlockPos(mx,my,mz), blockPos) > 50)
+		if(!(blockPos.withinDistance(new BlockPos(mx,my,mz), 50)))
 			return;
 		
 		BlockPos lastMirrorPos = new BlockPos(0,0,0);

@@ -1,18 +1,18 @@
 package com.edmistone.buildhelper.render;
 
-import javax.vecmath.Vector3f;
-
 import org.lwjgl.opengl.GL11;
 
 import com.edmistone.buildhelper.items.ItemSymmetryTool.SymmetryMode;
 import com.edmistone.buildhelper.operations.Render;
 
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
+
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 
 /** Rendering for symmetry system 
@@ -20,14 +20,14 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 public class RenderSymmetryMode
 {
 	/** Renders the symmetry lines based on the current symmetry mode of the player */
-	public static void renderSymmetryMode(RenderWorldLastEvent event, Entity player, Vector3f accuratePos, Vector3f translation)
+	public static void renderSymmetryMode(RenderWorldLastEvent event, Entity player, Vec3d projectedView)
 	{
 		float symmetryLineDistance = 100;
 		
-		NBTTagCompound playerTags = player.getEntityData();
-		float mx = playerTags.getFloat("SymmetryPosX");
+		CompoundNBT playerTags = player.getPersistentData();
+		float mx = -playerTags.getFloat("SymmetryPosX");
 		float my = playerTags.getFloat("SymmetryPosY");
-		float mz = playerTags.getFloat("SymmetryPosZ");
+		float mz = -playerTags.getFloat("SymmetryPosZ");
 		
 		SymmetryMode symmetryMode = SymmetryMode.values()[playerTags.getInt("SymmetryMode")];
 		boolean showNorthSouth =
@@ -38,16 +38,18 @@ public class RenderSymmetryMode
 		if(mx == 0 && my == 0 && mz == 0)
 			return;
 		
-		GlStateManager.pushMatrix();
-		GlStateManager.translatef(-translation.x, -translation.y, -translation.z);
-	    GlStateManager.enableRescaleNormal();
-	    Tessellator tessellator = Tessellator.getInstance();
+		Tessellator tessellator = Tessellator.getInstance();
 	    BufferBuilder vertexBuffer = tessellator.getBuffer();
 		
-		GlStateManager.disableTexture2D();
-	    GlStateManager.disableLighting();
-	    GlStateManager.enableBlend();
-	    GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		RenderSystem.pushMatrix();
+		RenderSystem.rotatef(player.rotationPitch, 1,0,0);
+		RenderSystem.rotatef(player.rotationYaw, 0,1,0);
+		RenderSystem.translated(projectedView.x - 0.5f, -projectedView.y, projectedView.z - 0.5f);
+		RenderSystem.enableRescaleNormal();
+	    RenderSystem.disableTexture();
+	    RenderSystem.disableLighting();
+	    RenderSystem.enableBlend();
+	    RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 	    
 	    for(float i = -5f; i < 5f; i+=0.05f)
 	    {
@@ -70,11 +72,11 @@ public class RenderSymmetryMode
 	        }
 	    }
 	    
-	    GlStateManager.disableBlend();
-	    GlStateManager.enableLighting();
-	    GlStateManager.enableTexture2D();
+	    RenderSystem.disableBlend();
+	    RenderSystem.enableLighting();
+	    RenderSystem.enableTexture();
 	    
-	    GlStateManager.disableRescaleNormal();
-	    GlStateManager.popMatrix();
+	    RenderSystem.disableRescaleNormal();
+	    RenderSystem.popMatrix();
 	}
 }

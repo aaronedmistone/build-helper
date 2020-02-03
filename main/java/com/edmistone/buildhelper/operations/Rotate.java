@@ -9,15 +9,14 @@ import com.edmistone.buildhelper.operations.Clone.CloneMode;
 import com.edmistone.buildhelper.operations.Clone.StaticCloneData;
 import com.google.common.collect.Lists;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MutableBoundingBox;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
@@ -26,35 +25,32 @@ import net.minecraft.world.World;
 public class Rotate
 {
 	/** Rotates region of source. Modified version of the clone command method. */
-	public static void rotate(BlockPos sourceBlockPosStart, BlockPos sourceBlockPosEnd, EntityPlayer player, World world)
+	@SuppressWarnings("deprecation")
+	public static void rotate(BlockPos sourceBlockPosStart, BlockPos sourceBlockPosEnd, PlayerEntity player, World world)
 	{
 		int offset = 100;
 		MutableBoundingBox sourceBoundingBox = MutableBoundingBoxHelper.reduceBoundingBox(new MutableBoundingBox(sourceBlockPosStart, sourceBlockPosEnd));
-		MutableBoundingBox destinationBoundingBox = new MutableBoundingBox(
-        		sourceBoundingBox.minX,
-        		sourceBoundingBox.minY + offset,
-        		sourceBoundingBox.minZ,
-        		sourceBoundingBox.maxX,
-        		sourceBoundingBox.maxY + offset,
-        		sourceBoundingBox.maxZ);
+		BlockPos destinationBlockPosStart = sourceBlockPosStart.add(0,100,0);
+		BlockPos destinationBlockPosEnd = sourceBlockPosEnd.add(0,100,0);
+		MutableBoundingBox destinationBoundingBox = MutableBoundingBoxHelper.reduceBoundingBox(new MutableBoundingBox(destinationBlockPosStart, destinationBlockPosEnd));
         
         int totalBlocks = sourceBoundingBox.getXSize() * sourceBoundingBox.getYSize() * sourceBoundingBox.getZSize();
 
         if (totalBlocks > 32768)
         {
-        	player.sendMessage(new TextComponentString(TextFormatting.RED + "BUILD TOOL: Build area too large (> 32768 blocks)"));
+        	player.sendMessage(new StringTextComponent(TextFormatting.RED + "BUILD TOOL: Build area too large (> 32768 blocks)"));
         	return;
         }
         	
     	if (sourceBoundingBox.minY < 0 || sourceBoundingBox.maxY >= 256 || destinationBoundingBox.minY < 0 || destinationBoundingBox.maxY >= 256)
         {
-    		player.sendMessage(new TextComponentString(TextFormatting.RED + "BUILD TOOL: Out of bounds"));
+    		player.sendMessage(new StringTextComponent(TextFormatting.RED + "BUILD TOOL: Out of bounds"));
     		return;
         }
 
-        if (!world.isAreaLoaded(sourceBoundingBox) || !world.isAreaLoaded(destinationBoundingBox))
+        if (!world.isAreaLoaded(sourceBlockPosStart, sourceBlockPosEnd) || !world.isAreaLoaded(destinationBlockPosStart, destinationBlockPosEnd))
         {
-        	player.sendMessage(new TextComponentString(TextFormatting.RED + "BUILD TOOL: Out of bounds"));
+        	player.sendMessage(new StringTextComponent(TextFormatting.RED + "BUILD TOOL: Out of bounds"));
         	return;
         }
 
@@ -83,26 +79,26 @@ public class Rotate
                 	BlockPos currentSourceBlock = new BlockPos(x, y, z);
                     BlockPos currentDestinationBlock = new BlockPos(sourceBoundingBox.maxZ - z + sourceBoundingBox.minZ, y+offset, x);
                     
-                    IBlockState currentBlockState = world.getBlockState(currentSourceBlock);
+                    BlockState currentBlockState = world.getBlockState(currentSourceBlock);
 
-                    if (currentBlockState.getBlock() != Blocks.AIR)
+                    if (currentBlockState.getBlock() != net.minecraft.block.Blocks.AIR)
                     {
                         TileEntity tileentity = world.getTileEntity(currentSourceBlock);
 
                         if (tileentity != null)
                         {
-                            NBTTagCompound nbttagcompound = tileentity.write(new NBTTagCompound());
+                            CompoundNBT nbttagcompound = tileentity.write(new CompoundNBT());
                             tileEntityBlocks.add(new StaticCloneData(currentDestinationBlock, currentBlockState, nbttagcompound));
                             oldSourceBlocks.addLast(currentSourceBlock);
                         }
-                        else if (!currentBlockState.isFullCube())
+                        else if (!currentBlockState.isSolid())
                         {
-                            partialBlocks.add(new StaticCloneData(currentDestinationBlock, currentBlockState, (NBTTagCompound)null));
+                            partialBlocks.add(new StaticCloneData(currentDestinationBlock, currentBlockState, (CompoundNBT)null));
                             oldSourceBlocks.addFirst(currentSourceBlock);
                         }
                         else
                         {
-                            fullBlocks.add(new StaticCloneData(currentDestinationBlock, currentBlockState, (NBTTagCompound)null));
+                            fullBlocks.add(new StaticCloneData(currentDestinationBlock, currentBlockState, (CompoundNBT)null));
                             oldSourceBlocks.addLast(currentSourceBlock);
                         }
                     }
@@ -125,7 +121,7 @@ public class Rotate
                 ((IInventory)destinationTileEntity).clear();
             }
             
-            world.setBlockState(destinationBlock.pos, Blocks.BARRIER.getDefaultState(), 2);
+            world.setBlockState(destinationBlock.pos, net.minecraft.block.Blocks.BARRIER.getDefaultState(), 2);
         }
 
         totalBlocks = 0;
@@ -144,9 +140,9 @@ public class Rotate
 
             if (destinationTileEntities.nbt != null && currentDestinationTileEntity != null)
             {
-                destinationTileEntities.nbt.setInt("x", destinationTileEntities.pos.getX());
-                destinationTileEntities.nbt.setInt("y", destinationTileEntities.pos.getY());
-                destinationTileEntities.nbt.setInt("z", destinationTileEntities.pos.getZ());
+                destinationTileEntities.nbt.putInt("x", destinationTileEntities.pos.getX());
+                destinationTileEntities.nbt.putInt("y", destinationTileEntities.pos.getY());
+                destinationTileEntities.nbt.putInt("z", destinationTileEntities.pos.getZ());
                 currentDestinationTileEntity.read(destinationTileEntities.nbt);
                 currentDestinationTileEntity.markDirty();
             }

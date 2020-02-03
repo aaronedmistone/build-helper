@@ -1,6 +1,6 @@
 package com.edmistone.buildhelper.helpers;
 
-import javax.vecmath.Vector3f;
+import net.minecraft.client.renderer.Vector3f;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
@@ -39,9 +39,9 @@ public class EntityHelper
 	public static Vector3f getTruePosition(Entity entity, float partialTicks)
 	{
 		Vector3f result = new Vector3f();
-		result.x = (float) (entity.prevPosX + ( ( entity.posX - entity.prevPosX ) * partialTicks ));
-		result.y = (float) (entity.prevPosY + ( ( entity.posY - entity.prevPosY ) * partialTicks ));
-		result.z = (float) (entity.prevPosZ + ( ( entity.posZ - entity.prevPosZ ) * partialTicks ));
+		result.setX((float) (entity.prevPosX + ( ( entity.getPosX() - entity.prevPosX ) * partialTicks )));
+		result.setY((float) (entity.prevPosY + ( ( entity.getPosY() - entity.prevPosY ) * partialTicks )));
+		result.setZ((float) (entity.prevPosZ + ( ( entity.getPosZ() - entity.prevPosZ ) * partialTicks )));
 		
 		return result;
 	}

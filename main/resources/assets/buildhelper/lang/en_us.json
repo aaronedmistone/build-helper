@@ -1,0 +1,13 @@
+{
+    "item.buildhelper.build_tool": "Build Tool",
+    "item.buildhelper.symmetry_tool": "Symmetry Tool",
+
+    "block.buildhelper.copy_block": "Copy Block",
+    "block.buildhelper.paste_block": "Paste Block",
+    "block.buildhelper.paste_variant_block": "Paste Variant Block",
+
+    "itemGroup.buildhelpertab": "Build Helper (By Aaron Edmistone)",
+
+    "build_tool.tooltip": "This tool can be used on `Copy Blocks` to rotate, or `Paste Blocks` to paste sections.",
+    "symmetry_tool.tooltip": "This tool can be used to create/modify lines of symmetry. Allowing mirror building."
+}

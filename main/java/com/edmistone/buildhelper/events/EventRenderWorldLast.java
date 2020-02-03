@@ -1,12 +1,12 @@
 package com.edmistone.buildhelper.events;
 
-import javax.vecmath.Vector3f;
-
-import com.edmistone.buildhelper.helpers.EntityHelper;
+import com.edmistone.buildhelper.render.RenderCopyArea;
+import com.edmistone.buildhelper.render.RenderPasteArea;
 import com.edmistone.buildhelper.render.RenderSymmetryMode;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 
 /** @author Aaron Edmistone */
@@ -15,13 +15,11 @@ public class EventRenderWorldLast
 	/** Fired during renderWorldPass at the end, before the hand is rendered */
 	public static void onRenderWorldLast(RenderWorldLastEvent event)
 	{
-		Entity player = Minecraft.getInstance().player;
-		Vector3f accuratePosition = EntityHelper.getTruePosition(player, event.getPartialTicks());
-		Vector3f translation = new Vector3f();
-		translation.x = accuratePosition.x - 0.5f;
-		translation.y = accuratePosition.y - 0.005f;
-		translation.z = accuratePosition.z - 0.5f;
-		
-		RenderSymmetryMode.renderSymmetryMode(event, player, accuratePosition, translation);
+		Minecraft instance = Minecraft.getInstance();
+		Entity player = instance.player;
+		Vec3d projectedView = instance.gameRenderer.getActiveRenderInfo().getProjectedView();
+		RenderCopyArea.renderCopyArea(event, player, projectedView);
+		RenderPasteArea.renderPasteArea(event, player, projectedView);
+		RenderSymmetryMode.renderSymmetryMode(event, player, projectedView);
 	}
 }

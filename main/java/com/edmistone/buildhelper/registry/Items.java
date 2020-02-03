@@ -5,7 +5,7 @@ import com.edmistone.buildhelper.items.ItemBuildTool;
 import com.edmistone.buildhelper.items.ItemSymmetryTool;
 
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
+import net.minecraft.item.BlockItem;
 import net.minecraftforge.registries.IForgeRegistry;
 
 /** Initialisation and registration of all mod items 
@@ -25,7 +25,7 @@ public class Items
 	{
 		init();
 		
-		for (ItemBlock value : Blocks.BLOCK_ITEMS.values())
+		for (BlockItem value : Blocks.BLOCK_ITEMS.values())
 		{
 		    registry.register(value);
 		}

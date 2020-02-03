@@ -1,6 +1,7 @@
 package com.edmistone.buildhelper.blocks;
 
 import com.edmistone.buildhelper.Info;
+import com.edmistone.buildhelper.helpers.BlockHelper;
 import com.edmistone.buildhelper.helpers.TagHelper;
 import com.edmistone.buildhelper.operations.Chat;
 import com.edmistone.buildhelper.operations.Compare;
@@ -10,18 +11,18 @@ import com.edmistone.buildhelper.registry.Sounds;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
@@ -33,74 +34,88 @@ public class BlockCopyBlock extends Block
 {
 	public BlockCopyBlock(String unlocalizedName)
 	{		
-		super(Properties.create(Material.GROUND).hardnessAndResistance(1, 20));
+		super(Properties.create(Material.CLAY).hardnessAndResistance(1, 20));
 		this.setRegistryName(new ResourceLocation(Info.MODID, unlocalizedName));
+	}
+	
+	public static void clearCopyBlockData(PlayerEntity player, CompoundNBT playerData)
+	{
+		playerData.put("CopyBlocks", new ListNBT());
+		player.writeUnlessRemoved(playerData);
 	}
 	
 	/** Removes this copy block data if assigned to any player*/
 	public void handleBlockDestroyed(World world, BlockPos pos)
 	{
-		if(world.isRemote)
-			return;
+//		if(world.isRemote)
+//			return;
 		
-		for(EntityPlayer player : world.playerEntities)
+		for(PlayerEntity player : world.getPlayers())
 		{
-			NBTTagCompound tagEntityData = player.getEntityData();
-			NBTTagList copyBlocks = tagEntityData.getList("CopyBlocks", 10);
+			CompoundNBT tagEntityData = player.getPersistentData();
+			ListNBT copyBlocks = tagEntityData.getList("CopyBlocks", 10);
 			
 			if(copyBlocks == null)
-				copyBlocks = new NBTTagList();
+				copyBlocks = new ListNBT();
 			
 			for (int i = 0; i < copyBlocks.toArray().length; i++)
 			{
 				BlockPos currentBlockPos = TagHelper.ReadBlockPos(copyBlocks.getCompound(i));
 				if(Compare.BlockPosIsEqual(currentBlockPos, pos))
 				{
-					copyBlocks.removeTag(i);
-					Chat.send(player, ">Copy block destroyed", TextFormatting.RED);
+					copyBlocks.remove(i);
+					
+					if(!world.isRemote)
+						Chat.send(player, "<Red>>Copy block destroyed");
+					
 					break;
 				}
 			}
 			
-			tagEntityData.setTag("CopyBlocks", copyBlocks);
+			tagEntityData.put("CopyBlocks", copyBlocks);
 			player.writeUnlessRemoved(tagEntityData);
 		}
 	}
 	
 	
 	/** Assigns this copy block to the placer entity and removes old copy blocks if needed*/
-	public void handleBlockAdded(EntityLivingBase placer, World worldIn, BlockPos pos)
+	public void handleBlockAdded(LivingEntity placer, World worldIn, BlockPos pos)
 	{
-		if(worldIn.isRemote)
-			return;
+//		if(worldIn.isRemote)
+//			return;
 		
-		NBTTagCompound tagEntityData = placer.getEntityData();
-		NBTTagList copyBlocks = tagEntityData.getList("CopyBlocks", 10);
+		CompoundNBT tagEntityData = placer.getPersistentData();
+		ListNBT copyBlocks = tagEntityData.getList("CopyBlocks", 10);
 		
 		if(copyBlocks == null)
-			copyBlocks = new NBTTagList();
+			copyBlocks = new ListNBT();
 		
 		if(copyBlocks.toArray().length >= 2)
 		{
 			for (int i = copyBlocks.toArray().length-1; i >= 0; i--)
 			{
 				BlockPos currentBlockPos = TagHelper.ReadBlockPos(copyBlocks.getCompound(i));
-				copyBlocks.removeTag(i);
-				worldIn.destroyBlock(currentBlockPos, true);
+				copyBlocks.remove(i);
+				
+				if(!worldIn.isRemote)
+					BlockHelper.DestroyBlockSilently(currentBlockPos, placer, true);
 			}
-			Chat.send(placer, ">Destroyed old copy blocks", TextFormatting.RED);
+			if(!worldIn.isRemote)
+				Chat.send(placer, "<Red>>Destroyed old copy blocks");
 		}
 		
 		copyBlocks.add(TagHelper.BlockPosToCompoundTag(pos));
-		Chat.send(placer, "Added new copy block [" + copyBlocks.toArray().length + "/2]", TextFormatting.BLUE);
 		
-		tagEntityData.setTag("CopyBlocks", copyBlocks);
+		if(!worldIn.isRemote)
+			Chat.send(placer, "<Blue>Added new copy block [" + copyBlocks.toArray().length + "/2]");
+		
+		tagEntityData.put("CopyBlocks", copyBlocks);
 		placer.writeUnlessRemoved(tagEntityData);
 	}
 	
 	
 	/** If the activating player is holding the build tool, rotates the copy region */
-	public void handleBlockActivated(EntityPlayer player, EnumHand hand, BlockPos pos)
+	public void handleBlockActivated(PlayerEntity player, Hand hand, BlockPos pos)
 	{
 		if(player.getHeldItem(hand) == null)
 			return;
@@ -121,11 +136,11 @@ public class BlockCopyBlock extends Block
 			if(player.world.isRemote)
 				return;
 			
-			NBTTagCompound tagEntityData = player.getEntityData();
-			NBTTagList copyBlocks = tagEntityData.getList("CopyBlocks", 10);
+			CompoundNBT tagEntityData = player.getPersistentData();
+			ListNBT copyBlocks = tagEntityData.getList("CopyBlocks", 10);
 			
 			if(copyBlocks == null)
-				copyBlocks = new NBTTagList();
+				copyBlocks = new ListNBT();
 			
 			if(copyBlocks.toArray().length == 2)
 			{
@@ -139,7 +154,7 @@ public class BlockCopyBlock extends Block
 	}
 	
 	@Override
-	public void onPlayerDestroy(IWorld worldIn, BlockPos pos, IBlockState state)
+	public void onPlayerDestroy(IWorld worldIn, BlockPos pos, BlockState state)
     {
 		handleBlockDestroyed(worldIn.getWorld(), pos);
     }
@@ -151,22 +166,21 @@ public class BlockCopyBlock extends Block
     }
 	
 	@Override
-	public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
+	public void onBlockPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack)
     {
 		handleBlockAdded(placer, worldIn, pos);
     }
 	
 	@Override
-	public void onBlockHarvested(World worldIn, BlockPos pos, IBlockState state, EntityPlayer player)
+	public void onBlockHarvested(World worldIn, BlockPos pos, BlockState state, PlayerEntity player)
     {
 		handleBlockDestroyed(worldIn, pos);
     }
 	
 	@Override
-	public boolean onBlockActivated(IBlockState state, World worldIn, BlockPos pos, EntityPlayer player,
-			EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
+	public ActionResultType onBlockActivated(BlockState blockState, World world, BlockPos blockPos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult)
 	{
-		handleBlockActivated(player, hand, pos);
-		return false;
+		handleBlockActivated(player, hand, blockPos);
+		return ActionResultType.PASS;
 	}
 }

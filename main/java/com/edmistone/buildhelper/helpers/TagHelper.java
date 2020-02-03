@@ -1,13 +1,13 @@
 package com.edmistone.buildhelper.helpers;
 
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 
 /** Helper functions for Tag classes 
  * @author Aaron Edmistone */
 public class TagHelper
 {
-	public static BlockPos ReadBlockPos(NBTTagCompound compoundTag)
+	public static BlockPos ReadBlockPos(CompoundNBT compoundTag)
 	{
 		int posX = compoundTag.getInt("posX");
 		int posY = compoundTag.getInt("posY");
@@ -15,12 +15,12 @@ public class TagHelper
 		return new BlockPos(posX, posY, posZ);
 	}
 	
-	public static NBTTagCompound BlockPosToCompoundTag(BlockPos pos)
+	public static CompoundNBT BlockPosToCompoundTag(BlockPos pos)
 	{
-		NBTTagCompound compoundTag = new NBTTagCompound();
-		compoundTag.setInt("posX", pos.getX());
-		compoundTag.setInt("posY", pos.getY());
-		compoundTag.setInt("posZ", pos.getZ());
+		CompoundNBT compoundTag = new CompoundNBT();
+		compoundTag.putInt("posX", pos.getX());
+		compoundTag.putInt("posY", pos.getY());
+		compoundTag.putInt("posZ", pos.getZ());
 		return compoundTag;
 	}
 }

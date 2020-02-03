@@ -1,13 +1,22 @@
 package com.edmistone.buildhelper.helpers;
 
-import net.minecraft.block.BlockHorizontal;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
+import javax.annotation.Nullable;
+
+import com.edmistone.buildhelper.operations.BlockVariant;
+
+import net.minecraft.block.HorizontalBlock;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.item.Item;
 import net.minecraft.state.DirectionProperty;
-import net.minecraft.state.IProperty;
+import net.minecraft.state.EnumProperty;
+import net.minecraft.state.properties.BlockStateProperties;
+import net.minecraft.state.properties.StairsShape;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -15,28 +24,49 @@ import net.minecraft.world.World;
  *  @author Aaron Edmistone */
 public class BlockHelper
 {
-	public static final DirectionProperty FACING = BlockHorizontal.HORIZONTAL_FACING;
+	public static final DirectionProperty FACING = HorizontalBlock.HORIZONTAL_FACING;
+	public static final EnumProperty<StairsShape> STAIRS_SHAPE = BlockStateProperties.STAIRS_SHAPE;
 	
 	/** Returns an IBlockState with the facing property flipped on the given axis */
-	public static IBlockState FlipFacing(IBlockState blockState, boolean northSouth, boolean eastWest)
-	{
+	public static BlockState FlipFacing(BlockState blockState, boolean northSouth, boolean eastWest)
+	{		
+		if(blockState.getProperties().contains(STAIRS_SHAPE) && (!northSouth || !eastWest))
+		{
+			if(blockState.get(STAIRS_SHAPE) == StairsShape.INNER_LEFT)
+			{
+				blockState = blockState.with(STAIRS_SHAPE, StairsShape.INNER_RIGHT);
+			}
+			else if(blockState.get(STAIRS_SHAPE) == StairsShape.OUTER_LEFT)
+			{
+				blockState = blockState.with(STAIRS_SHAPE, StairsShape.OUTER_RIGHT);
+			}
+			else if(blockState.get(STAIRS_SHAPE) == StairsShape.INNER_RIGHT)
+			{
+				blockState = blockState.with(STAIRS_SHAPE, StairsShape.INNER_LEFT);
+			}
+			else if(blockState.get(STAIRS_SHAPE) == StairsShape.OUTER_RIGHT)
+			{
+				blockState = blockState.with(STAIRS_SHAPE, StairsShape.OUTER_LEFT);
+			}
+		}
+		
 		if(blockState.getProperties().contains(FACING))
 		{
-			if(northSouth && blockState.get(FACING) == EnumFacing.NORTH)
+			if(northSouth && blockState.get(FACING) == Direction.NORTH)
 			{
-				return blockState.with(FACING, EnumFacing.SOUTH);
+				blockState = blockState.with(FACING, Direction.SOUTH);
 			} 
-			else if (eastWest && blockState.get(FACING) == EnumFacing.EAST)
+			else if (eastWest && blockState.get(FACING) == Direction.EAST)
 			{
-				return blockState.with(FACING, EnumFacing.WEST);
+				blockState = blockState.with(FACING, Direction.WEST);
 			}
-			else if (northSouth && blockState.get(FACING) == EnumFacing.SOUTH)
+			else if (northSouth && blockState.get(FACING) == Direction.SOUTH)
 			{
-				return blockState.with(FACING, EnumFacing.NORTH);
+				blockState = blockState.with(FACING, Direction.NORTH);
 			}
-			else if (eastWest && blockState.get(FACING) == EnumFacing.WEST)
+			else if (eastWest && blockState.get(FACING) == Direction.WEST)
 			{
-				return blockState.with(FACING, EnumFacing.EAST);
+				blockState = blockState.with(FACING, Direction.EAST);
 			}
 		}
 		
@@ -44,61 +74,66 @@ public class BlockHelper
 	}
 	
 	/** Returns an IBlockState with the facing property rotated CW 90 degrees */
-	public static IBlockState RotateFacing(IBlockState blockState)
+	public static BlockState RotateFacing(BlockState blockState)
 	{
 		if(blockState.getProperties().contains(FACING))
 		{
-			if(blockState.get(FACING) == EnumFacing.NORTH)
+			if(blockState.get(FACING) == Direction.NORTH)
 			{
-				return blockState.with(FACING, EnumFacing.EAST);
+				return blockState.with(FACING, Direction.EAST);
 			} 
-			else if (blockState.get(FACING) == EnumFacing.EAST)
+			else if (blockState.get(FACING) == Direction.EAST)
 			{
-				return blockState.with(FACING, EnumFacing.SOUTH);
+				return blockState.with(FACING, Direction.SOUTH);
 			}
-			else if (blockState.get(FACING) == EnumFacing.SOUTH)
+			else if (blockState.get(FACING) == Direction.SOUTH)
 			{
-				return blockState.with(FACING, EnumFacing.WEST);
+				return blockState.with(FACING, Direction.WEST);
 			}
-			else if (blockState.get(FACING) == EnumFacing.WEST)
+			else if (blockState.get(FACING) == Direction.WEST)
 			{
-				return blockState.with(FACING, EnumFacing.NORTH);
+				return blockState.with(FACING, Direction.NORTH);
 			}
 		}
-		
-		cycleBlockVariant(null, null, 0, 0);
 		
 		return blockState;
 	}
 	
-	/** Broken in 1.13.2. 
-	 * {@link com.edmistone.buildhelper.blocks.BlockPasteVariantBlock} disabled until fixed.
-	 * Cycles the block 'variant' and 'color' properties of a block by the given amounts*/
-	@Deprecated
-	public static boolean cycleBlockVariant(World world, BlockPos pos, int variantCycles, int colorCycles)
+	@Nullable
+	public static Item BlockToItem(Block block)
+	{
+		return net.minecraftforge.registries.GameData.getBlockItemMap().get(block);
+	}
+	
+	public static void DestroyBlockSilently(BlockPos pos, LivingEntity entity, Boolean spawnDrops)
+	{
+		BlockState state = entity.world.getBlockState(pos);
+		Block.spawnDrops(state, entity.world, pos, null, entity, entity.getHeldItemMainhand());
+		entity.world.setBlockState(pos, Blocks.AIR.getDefaultState());
+	}
+	
+	/** Replaces a block by cycling the block variant by the given amounts and retaining the facing direction*/
+	public static boolean setBlockStateWithVariantCycle(World world, BlockPos pos, BlockState currentBlockState, int variantCycles)
     {
-		boolean result = false;
-        IBlockState state = world.getBlockState(pos);
-        for (IProperty<?> prop : state.getProperties())
-        {
-        	if (prop.getName().equals("variant"))
-            {
-            	for(int i = 0; i < variantCycles; i++)
-            		state = state.cycle(prop);
-        		
-            	world.setBlockState(pos, state);
-            	result = true;
-            }
-        	else if (prop.getName().equals("color"))
-            {
-            	for(int i = 0; i < colorCycles; i++)
-            		state = state.cycle(prop);
-            		
-            	world.setBlockState(pos, state);
-            	result = true;
-            }
-        }
-        return result;
+		//BlockState currentBlockState = world.getBlockState(pos);
+		Block currentBlock = currentBlockState.getBlock();
+		BlockState newBlockState = BlockVariant.getVariant(currentBlock, variantCycles).getDefaultState();
+		
+		try
+		{
+			newBlockState = BlockStateHelper.copyProperties(currentBlockState, newBlockState);
+		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e)
+		{
+			e.printStackTrace();
+		}
+		
+//		if(newBlockState.has(BlockStateProperties.BED_PART))
+//		{ 
+//			if(newBlockState.get(BlockStateProperties.BED_PART) == BedPart.FOOT)
+//				return true;
+//		}
+		
+		return world.setBlockState(pos, newBlockState, 2);
     }
 	
 	/** Deletes a block */
@@ -109,6 +144,6 @@ public class BlockHelper
         if (oldSourceTileEntity instanceof IInventory)
             ((IInventory)oldSourceTileEntity).clear();
         
-        world.setBlockState(pos, Blocks.AIR.getDefaultState(), 3);
+        world.setBlockState(pos, net.minecraft.block.Blocks.AIR.getDefaultState(), 3);
 	}
 }

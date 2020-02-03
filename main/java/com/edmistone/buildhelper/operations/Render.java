@@ -1,7 +1,7 @@
 package com.edmistone.buildhelper.operations;
 
 import java.util.List;
-import javax.vecmath.Vector3d;
+import net.minecraft.client.renderer.Vector3d;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;

@@ -16,8 +16,8 @@ You will find the bulk of the source here:
 ## Notes:
 1. This mod is safe for survival and server use.
 2. To allow for survival and server use of this mod, only players with `/op` can use the following:
-Symmetry Tool (because it currently does not calculate cost of symmetry, this will come soon though)
-Paste Variant Block (because I am not certain it cannot be abused for gathering valuable variants)
+- Symmetry Tool (because it currently does not calculate cost of symmetry, this will come soon though)
+- Paste Variant Block (because I am not certain it cannot be abused for gathering valuable variants)
 3. You can switch between any **Build Helper** blocks and items by `Shift + Right-Clicking`
 
 ## What are the features of the mod?
